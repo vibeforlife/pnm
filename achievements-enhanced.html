@@ -233,7 +233,7 @@
       </div>
     </div>
     <div>
-      <div class="icon-btn" onclick="window.location.href='admin.html?group=' + groupId" title="Back to Admin">
+      <div class="icon-btn" onclick="goBack()" title="Back">
         ←
       </div>
     </div>
@@ -766,6 +766,13 @@
         day: 'numeric', 
         year: 'numeric' 
       });
+    }
+
+    function goBack() {
+      // Check URL parameters for source page
+      const urlParams = new URLSearchParams(window.location.search);
+      const source = urlParams.get('source') || 'admin';
+      window.location.href = `${source}.html?group=${groupId}`;
     }
 
     if (document.readyState === 'loading') {
