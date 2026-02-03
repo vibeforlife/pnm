@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poker Night Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-dark: #0a0e27;
+      --primary-blue: #1a1f4d;
+      --accent-purple: #6366f1;
+      --accent-cyan: #06b6d4;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Animated background elements */
+    .bg-decoration {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .poker-chip {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+      opacity: 0.1;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .chip-1 {
+      top: 10%;
+      left: -5%;
+      animation-delay: 0s;
+    }
+
+    .chip-2 {
+      bottom: 20%;
+      right: -5%;
+      background: radial-gradient(circle, var(--accent-cyan) 0%, transparent 70%);
+      animation-delay: 7s;
+    }
+
+    .chip-3 {
+      top: 60%;
+      left: 10%;
+      width: 150px;
+      height: 150px;
+      animation-delay: 14s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(30px, -30px) rotate(120deg); }
+      66% { transform: translate(-20px, 20px) rotate(240deg); }
+    }
+
+    /* Card suits decoration */
+    .suits-decoration {
+      position: fixed;
+      font-size: 120px;
+      opacity: 0.03;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .suit-1 { top: 5%; right: 15%; }
+    .suit-2 { bottom: 10%; left: 10%; color: var(--error); }
+    .suit-3 { top: 40%; right: 5%; color: var(--error); }
+    .suit-4 { bottom: 35%; left: 20%; }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Logo section */
+    .logo-section {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      padding: 15px 30px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .logo-icon {
+      font-size: 48px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.5));
+    }
+
+    .logo-text {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .tagline {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Glass cards */
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+      animation: fadeInUp 0.8s ease-out;
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Outfit', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      color: white;
+      box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--glass-bg);
+      border: 2px solid var(--glass-border);
+      color: var(--text-primary);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn + .btn {
+      margin-top: 12px;
+    }
+
+    /* Form elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 16px;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: rgba(203, 213, 225, 0.5);
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      opacity: 0.8;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 14, 39, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-content {
+      background: var(--primary-blue);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 30px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: scaleIn 0.3s ease-out;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .modal-close {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      color: var(--text-primary);
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
+    }
+
+    /* Group list */
+    .group-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .group-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .group-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-cyan);
+      transform: translateX(5px);
+    }
+
+    .group-info {
+      flex: 1;
+    }
+
+    .group-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .group-role {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .group-role.admin {
+      color: var(--accent-cyan);
+    }
+
+    .group-role.viewer {
+      color: var(--accent-purple);
+    }
+
+    .group-arrow {
+      font-size: 20px;
+      color: var(--text-secondary);
+    }
+
+    /* Success message */
+    .success-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1));
+      border: 2px solid var(--success);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .success-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--success);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .code-display {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 15px;
+      font-family: 'Space Mono', monospace;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--accent-cyan);
+      letter-spacing: 3px;
+      margin: 10px 0;
+    }
+
+    .info-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Error message */
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--error);
+      font-size: 14px;
+      margin-bottom: 15px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+      animation: fadeInDown 0.3s ease-out;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+      }
+
+      .logo-section {
+        margin-bottom: 30px;
+      }
+
+      .logo-text {
+        font-size: 24px;
+      }
+
+      .glass-card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background decorations -->
+  <div class="bg-decoration poker-chip chip-1"></div>
+  <div class="bg-decoration poker-chip chip-2"></div>
+  <div class="bg-decoration poker-chip chip-3"></div>
+  
+  <div class="suits-decoration suit-1">♠</div>
+  <div class="suits-decoration suit-2">♥</div>
+  <div class="suits-decoration suit-3">♦</div>
+  <div class="suits-decoration suit-4">♣</div>
+
+  <div class="container">
+    <!-- Logo -->
+    <div class="logo-section">
+      <div class="logo">
+        <div class="logo-icon">♠♥</div>
+        <div class="logo-text">Poker Night Manager</div>
+      </div>
+      <div class="tagline">Track • Compete • Dominate</div>
+    </div>
+
+    <!-- Main actions -->
+    <div class="glass-card" id="mainCard">
+      <button class="btn btn-primary" onclick="openModal('createModal')">
+        <span>🎲 Create New Group</span>
+      </button>
+      <button class="btn btn-secondary" onclick="openModal('joinModal')">
+        <span>🔑 Join Existing Group</span>
+      </button>
+    </div>
+
+    <!-- My Groups -->
+    <div class="glass-card" id="groupsCard" style="display: none;">
+      <div class="card-title">Your Groups</div>
+      <div class="group-list" id="groupsList"></div>
+    </div>
+  </div>
+
+  <!-- Create Group Modal -->
+  <div class="modal" id="createModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Create New Group</div>
+        <button class="modal-close" onclick="closeModal('createModal')">×</button>
+      </div>
+
+      <div id="createForm">
+        <div class="error-message" id="createError"></div>
+
+        <div class="form-group">
+          <label class="form-label">Group Name</label>
+          <input type="text" class="form-input" id="createGroupName" placeholder="Friday Night Poker" maxlength="30">
+          <div class="form-hint">Give your poker group a memorable name</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Group Code (Optional)</label>
+          <input type="text" class="form-input" id="createGroupCode" placeholder="Leave blank for auto-generated" maxlength="20">
+          <div class="form-hint">Custom code or leave blank for auto-generation</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Admin Password</label>
+          <input type="password" class="form-input" id="createAdminPass" placeholder="Enter admin password" minlength="6">
+          <div class="form-hint">Minimum 6 characters • Full access to manage group</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Viewer Password (Optional)</label>
+          <input type="password" class="form-input" id="createViewerPass" placeholder="Enter viewer password" minlength="6">
+          <div class="form-hint">Read-only access • Leave blank to disable</div>
+        </div>
+
+        <button class="btn btn-primary" onclick="createGroup()" id="createBtn">
+          <span>Create Group</span>
+        </button>
+      </div>
+
+      <!-- Success state -->
+      <div id="createSuccess" style="display: none;">
+        <div class="success-card">
+          <div class="success-title">
+            <span>✅</span>
+            <span>Group Created!</span>
+          </div>
+          <div class="code-display" id="newGroupCode"></div>
+          <div class="info-text">
+            Share this code with your friends so they can join your group. Save your passwords - you'll need them to access the group.
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="enterGroup()">
+          <span>Enter Group</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Join Group Modal -->
+  <div class="modal" id="joinModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Join Group</div>
+        <button class="modal-close" onclick="closeModal('joinModal')">×</button>
+      </div>
+
+      <div class="error-message" id="joinError"></div>
+
+      <div class="form-group">
+        <label class="form-label">Group Code</label>
+        <input type="text" class="form-input" id="joinGroupCode" placeholder="Enter group code" style="text-transform: uppercase;">
+        <div class="form-hint">Get this from your group admin</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="joinPassword" placeholder="Enter password" minlength="6">
+        <div class="form-hint">Admin or viewer password</div>
+      </div>
+
+      <button class="btn btn-primary" onclick="joinGroup()" id="joinBtn">
+        <span>Join Group</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRFKc8fr96RNryd9r7OOco-xoQlf_ZcFg",
+      authDomain: "pnm-fx2.firebaseapp.com",
+      projectId: "pnm-fx2",
+      storageBucket: "pnm-fx2.firebasestorage.app",
+      messagingSenderId: "186393450910",
+      appId: "1:186393450910:web:1acfae1bee6e46b718de8f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Make Firebase available globally
+    window.db = db;
+    window.firestore = { collection, doc, setDoc, getDoc };
+  </script>
+
+  <script>
+    // Helper functions
+    function generateGroupCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 8; i++) {
+        if (i === 4) code += '-';
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    function showError(elementId, message) {
+      const errorEl = document.getElementById(elementId);
+      errorEl.textContent = message;
+      errorEl.classList.add('show');
+      setTimeout(() => errorEl.classList.remove('show'), 5000);
+    }
+
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+      // Reset forms
+      if (modalId === 'createModal') {
+        document.getElementById('createForm').style.display = 'block';
+        document.getElementById('createSuccess').style.display = 'none';
+        document.getElementById('createGroupName').value = '';
+        document.getElementById('createGroupCode').value = '';
+        document.getElementById('createAdminPass').value = '';
+        document.getElementById('createViewerPass').value = '';
+      } else if (modalId === 'joinModal') {
+        document.getElementById('joinGroupCode').value = '';
+        document.getElementById('joinPassword').value = '';
+      }
+    }
+
+    // Create group
+    let createdGroupId = null;
+    let createdGroupRole = null;
+
+    async function createGroup() {
+      const name = document.getElementById('createGroupName').value.trim();
+      const customCode = document.getElementById('createGroupCode').value.trim().toUpperCase();
+      const adminPass = document.getElementById('createAdminPass').value;
+      const viewerPass = document.getElementById('createViewerPass').value;
+
+      if (!name) {
+        showError('createError', 'Please enter a group name');
+        return;
+      }
+
+      if (adminPass.length < 6) {
+        showError('createError', 'Admin password must be at least 6 characters');
+        return;
+      }
+
+      if (viewerPass && viewerPass.length < 6) {
+        showError('createError', 'Viewer password must be at least 6 characters');
+        return;
+      }
+
+      const createBtn = document.getElementById('createBtn');
+      createBtn.innerHTML = '<span class="spinner"></span>';
+      createBtn.disabled = true;
+
+      try {
+        // Generate or use custom code
+        let groupCode = customCode || generateGroupCode();
+        
+        // Check if code already exists
+        const groupRef = window.firestore.doc(window.db, 'groups', groupCode);
+        const groupSnap = await window.firestore.getDoc(groupRef);
+        
+        if (groupSnap.exists()) {
+          showError('createError', 'Group code already exists. Try a different code or leave blank for auto-generation.');
+          createBtn.innerHTML = '<span>Create Group</span>';
+          createBtn.disabled = false;
+          return;
+        }
+
+        // Hash passwords
+        const adminHash = await hashPassword(adminPass);
+        const viewerHash = viewerPass ? await hashPassword(viewerPass) : null;
+
+        // Create group
+        const groupData = {
+          id: groupCode,
+          name: name,
+          adminPasswordHash: adminHash,
+          viewerPasswordHash: viewerHash,
+          createdAt: new Date().toISOString(),
+          players: [],
+          nights: [],
+          archivedYears: {},
+          currentYear: new Date().getFullYear(),
+          settings: {
+            currency: '$',
+            defaultBuyIn: 20
+          }
+        };
+
+        await window.firestore.setDoc(groupRef, groupData);
+
+        // Save to user's groups
+        saveUserGroup(groupCode, name, 'admin');
+
+        // Show success
+        document.getElementById('createForm').style.display = 'none';
+        document.getElementById('createSuccess').style.display = 'block';
+        document.getElementById('newGroupCode').textContent = groupCode;
+        
+        createdGroupId = groupCode;
+        createdGroupRole = 'admin';
+
+      } catch (error) {
+        console.error('Error creating group:', error);
+        showError('createError', 'Failed to create group. Please try again.');
+        createBtn.innerHTML = '<span>Create Group</span>';
+        createBtn.disabled = false;
+      }
+    }
+
+    // Join group
+    async function joinGroup() {
+      const groupCode = document.getElementById('joinGroupCode').value.trim().toUpperCase();
+      const password = document.getElementById('joinPassword').value;
+
+      if (!groupCode) {
+        showError('joinError', 'Please enter a group code');
+        return;
+      }
+
+      if (!password) {
+        showError('joinError', 'Please enter a password');
+        return;
+      }
+
+      const joinBtn = document.getElementById('joinBtn');
+      joinBtn.innerHTML = '<span class="spinner"></span>';
+      joinBtn.disabled = true;
+
+      try {
+        // Get group
+        const groupRef = window.firestore.doc(window.db, 'groups', groupCode);
+        const groupSnap = await window.firestore.getDoc(groupRef);
+
+        if (!groupSnap.exists()) {
+          showError('joinError', 'Group not found. Check the code and try again.');
+          joinBtn.innerHTML = '<span>Join Group</span>';
+          joinBtn.disabled = false;
+          return;
+        }
+
+        const groupData = groupSnap.data();
+        const passwordHash = await hashPassword(password);
+
+        // Check password
+        let role = null;
+        if (passwordHash === groupData.adminPasswordHash) {
+          role = 'admin';
+        } else if (groupData.viewerPasswordHash && passwordHash === groupData.viewerPasswordHash) {
+          role = 'viewer';
+        }
+
+        if (!role) {
+          showError('joinError', 'Invalid password');
+          joinBtn.innerHTML = '<span>Join Group</span>';
+          joinBtn.disabled = false;
+          return;
+        }
+
+        // Save to user's groups
+        saveUserGroup(groupCode, groupData.name, role);
+
+        // Redirect to appropriate page
+        const page = role === 'admin' ? 'admin.html' : 'viewer.html';
+        window.location.href = `${page}?group=${groupCode}`;
+
+      } catch (error) {
+        console.error('Error joining group:', error);
+        showError('joinError', 'Failed to join group. Please try again.');
+        joinBtn.innerHTML = '<span>Join Group</span>';
+        joinBtn.disabled = false;
+      }
+    }
+
+    // Save user's group to localStorage
+    function saveUserGroup(groupId, groupName, role) {
+      let userGroups = JSON.parse(localStorage.getItem('userGroups') || '[]');
+      
+      // Check if already exists
+      const existingIndex = userGroups.findIndex(g => g.groupId === groupId);
+      if (existingIndex >= 0) {
+        userGroups[existingIndex] = {
+          groupId,
+          groupName,
+          role,
+          lastAccessed: new Date().toISOString()
+        };
+      } else {
+        userGroups.push({
+          groupId,
+          groupName,
+          role,
+          lastAccessed: new Date().toISOString()
+        });
+      }
+
+      localStorage.setItem('userGroups', JSON.stringify(userGroups));
+      loadUserGroups();
+    }
+
+    // Load user's groups
+    function loadUserGroups() {
+      const userGroups = JSON.parse(localStorage.getItem('userGroups') || '[]');
+      
+      if (userGroups.length === 0) {
+        document.getElementById('groupsCard').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('groupsCard').style.display = 'block';
+      
+      const groupsList = document.getElementById('groupsList');
+      groupsList.innerHTML = userGroups
+        .sort((a, b) => new Date(b.lastAccessed) - new Date(a.lastAccessed))
+        .map(group => `
+          <div class="group-item" onclick="openGroup('${group.groupId}', '${group.role}')">
+            <div class="group-info">
+              <div class="group-name">${group.groupName}</div>
+              <div class="group-role ${group.role}">${group.role === 'admin' ? '👑 Admin' : '👁️ Viewer'}</div>
+            </div>
+            <div class="group-arrow">→</div>
+          </div>
+        `).join('');
+    }
+
+    // Open group
+    function openGroup(groupId, role) {
+      // Update last accessed
+      let userGroups = JSON.parse(localStorage.getItem('userGroups') || '[]');
+      const groupIndex = userGroups.findIndex(g => g.groupId === groupId);
+      if (groupIndex >= 0) {
+        userGroups[groupIndex].lastAccessed = new Date().toISOString();
+        localStorage.setItem('userGroups', JSON.stringify(userGroups));
+      }
+
+      const page = role === 'admin' ? 'admin.html' : 'viewer.html';
+      window.location.href = `${page}?group=${groupId}`;
+    }
+
+    // Enter newly created group
+    function enterGroup() {
+      if (createdGroupId && createdGroupRole) {
+        openGroup(createdGroupId, createdGroupRole);
+      }
+    }
+
+    // Initialize
+    loadUserGroups();
+  </script>
+</body>
+</html>

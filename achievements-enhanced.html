@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poker Night Manager - Achievements</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-dark: #0a0e27;
+      --primary-blue: #1a1f4d;
+      --accent-purple: #6366f1;
+      --accent-cyan: #06b6d4;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      padding: 15px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-small {
+      font-size: 24px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+    }
+
+    .group-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .icon-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 18px;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.1);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    /* Achievement Badge */
+    .achievement-badge {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1));
+      border: 1px solid var(--accent-purple);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .achievement-badge:hover {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15));
+      transform: translateX(5px);
+    }
+
+    .achievement-icon {
+      font-size: 36px;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .achievement-info {
+      flex: 1;
+    }
+
+    .achievement-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .achievement-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .achievement-date {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: 'Space Mono', monospace;
+      margin-top: 4px;
+    }
+
+    .achievement-player {
+      font-size: 14px;
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 15px;
+      opacity: 0.3;
+    }
+
+    /* Anniversary badges (special styling) */
+    .achievement-badge.anniversary {
+      background: linear-gradient(135deg, rgba(241, 196, 15, 0.2), rgba(230, 126, 34, 0.2));
+      border: 2px solid #f39c12;
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-small">♠♥</div>
+      <div>
+        <div class="group-name" id="headerGroupName">Loading...</div>
+      </div>
+    </div>
+    <div>
+      <div class="icon-btn" onclick="window.location.href='admin.html?group=' + groupId" title="Back to Admin">
+        ←
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="glass-card">
+      <div class="card-title">🎖️ Achievements</div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <div>
+          <select class="form-select" id="yearSelect" onchange="loadAchievements()">
+            <option value="ytd">Year to Date</option>
+            <option value="lifetime">Lifetime</option>
+          </select>
+        </div>
+        <div>
+          <select class="form-select" id="playerFilter" onchange="loadAchievements()">
+            <option value="all">All Players</option>
+          </select>
+        </div>
+        <div>
+          <select class="form-select" id="badgeFilter" onchange="loadAchievements()">
+            <option value="all">All Badges</option>
+            <option value="🎯 Welcome to Club">🎯 Welcome to Club</option>
+            <option value="🎲 Veteran Player">🎲 Veteran Player</option>
+            <option value="⭐ Dedication">⭐ Dedication</option>
+            <option value="🏆 High Roller">🏆 High Roller</option>
+            <option value="🔥 Hot Streak">🔥 Hot Streak</option>
+            <option value="💰 Big Winner">💰 Big Winner</option>
+            <option value="💎 Profit Master">💎 Profit Master</option>
+            <option value="💀 Grim Reaper">💀 Grim Reaper</option>
+            <option value="🔒 Fortress">🔒 Fortress</option>
+            <option value="🏦 Bankroll Builder">🏦 Bankroll Builder</option>
+            <option value="🎂 Anniversary">🎂 Anniversary (Any Year)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Achievement Stats -->
+      <div class="stats-grid" id="achievementStats"></div>
+      
+      <!-- Achievement List -->
+      <div id="achievementsList"></div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRFKc8fr96RNryd9r7OOco-xoQlf_ZcFg",
+      authDomain: "pnm-fx2.firebaseapp.com",
+      projectId: "pnm-fx2",
+      storageBucket: "pnm-fx2.firebasestorage.app",
+      messagingSenderId: "186393450910",
+      appId: "1:186393450910:web:1acfae1bee6e46b718de8f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.firestore = { doc, getDoc, onSnapshot };
+    window.firebaseReady = true;
+    
+    if (window.init) {
+      window.init();
+    }
+  </script>
+
+  <script>
+    let groupData = null;
+    let groupId = null;
+
+    async function init() {
+      if (!window.firebaseReady || !window.db) {
+        setTimeout(init, 100);
+        return;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      groupId = urlParams.get('group');
+
+      if (!groupId) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      await loadGroupData();
+
+      const groupRef = window.firestore.doc(window.db, 'groups', groupId);
+      window.firestore.onSnapshot(groupRef, (doc) => {
+        if (doc.exists()) {
+          groupData = doc.data();
+          
+          // Populate year dropdown
+          populateYearDropdown();
+          loadAchievements();
+        }
+      });
+    }
+
+    async function loadGroupData() {
+      try {
+        const groupRef = window.firestore.doc(window.db, 'groups', groupId);
+        const groupSnap = await window.firestore.getDoc(groupRef);
+
+        if (!groupSnap.exists()) {
+          alert('Group not found');
+          window.location.href = 'index.html';
+          return;
+        }
+
+        groupData = groupSnap.data();
+        
+        if (!groupData.players) groupData.players = [];
+        if (!groupData.nights) groupData.nights = [];
+        if (!groupData.playerInfo) groupData.playerInfo = {};
+        if (!groupData.settings) groupData.settings = { currency: '$', defaultBuyIn: 20 };
+
+        document.getElementById('headerGroupName').textContent = groupData.name;
+        
+        populateYearDropdown();
+        loadAchievements();
+      } catch (error) {
+        console.error('Error loading group:', error);
+      }
+    }
+
+    function populateYearDropdown() {
+      const yearSelect = document.getElementById('yearSelect');
+      const currentYear = new Date().getFullYear();
+      
+      // Get all unique years from nights
+      const years = [...new Set(groupData.nights.map(n => {
+        const [year] = n.date.split('-');
+        return parseInt(year);
+      }))].sort((a, b) => b - a);
+      
+      // Clear existing options except YTD and Lifetime
+      while (yearSelect.options.length > 2) {
+        yearSelect.remove(2);
+      }
+      
+      // Add individual years
+      years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+      });
+    }
+
+    function loadAchievements() {
+      // Populate player dropdown if needed
+      const playerFilter = document.getElementById('playerFilter');
+      if (playerFilter && playerFilter.options.length === 1) {
+        groupData.players.forEach(player => {
+          const option = document.createElement('option');
+          option.value = player;
+          option.textContent = player;
+          playerFilter.appendChild(option);
+        });
+      }
+      
+      const period = document.getElementById('yearSelect').value;
+      const selectedPlayer = playerFilter?.value || 'all';
+      const selectedBadge = document.getElementById('badgeFilter')?.value || 'all';
+      const currentYear = new Date().getFullYear();
+      
+      // Filter nights by period
+      let nights = groupData.nights || [];
+      
+      if (period === 'ytd') {
+        nights = nights.filter(n => {
+          const [year] = n.date.split('-');
+          return parseInt(year) === currentYear;
+        });
+      } else if (period !== 'lifetime') {
+        // Specific year selected
+        const selectedYear = parseInt(period);
+        nights = nights.filter(n => {
+          const [year] = n.date.split('-');
+          return parseInt(year) === selectedYear;
+        });
+      }
+      
+      let achievements = calculateEnhancedAchievements(nights);
+      
+      // Filter by player
+      if (selectedPlayer !== 'all') {
+        achievements = achievements.filter(a => a.player === selectedPlayer);
+      }
+      
+      // Filter by badge
+      if (selectedBadge !== 'all') {
+        if (selectedBadge === '🎂 Anniversary') {
+          achievements = achievements.filter(a => a.isAnniversary);
+        } else {
+          // Remove emoji from selected badge for comparison
+          const badgeName = selectedBadge.replace(/^[\u{1F000}-\u{1F9FF}]\s+/u, '');
+          achievements = achievements.filter(a => a.name === badgeName);
+        }
+      }
+      
+      displayAchievements(achievements);
+      displayAchievementStats(achievements);
+    }
+
+    function calculateEnhancedAchievements(nights) {
+      const achievements = [];
+      const players = groupData.players || [];
+      const playerInfo = groupData.playerInfo || {};
+      const currentDate = new Date();
+      
+      // Calculate player stats for the period
+      const playerStats = {};
+      
+      players.forEach(p => {
+        playerStats[p] = {
+          games: 0,
+          wins: 0,
+          totalWinnings: 0,
+          biggestWin: 0,
+          biggestLoss: 0,
+          consecutiveWins: 0,
+          maxConsecutiveWins: 0,
+          consecutiveNoBust: 0,
+          maxConsecutiveNoBust: 0,
+          monthlyWinnings: {},
+          playersEliminated: 0
+        };
+      });
+      
+      // Process nights in chronological order
+      const sortedNights = nights.slice().sort((a, b) => a.date.localeCompare(b.date));
+      
+      sortedNights.forEach(night => {
+        const losers = night.results.filter(r => r.winnings < 0).length;
+        
+        night.results.forEach(r => {
+          if (!playerStats[r.player]) return;
+          
+          const ps = playerStats[r.player];
+          ps.games++;
+          ps.totalWinnings += r.winnings;
+          
+          if (r.winnings > 0) {
+            ps.wins++;
+            ps.consecutiveWins++;
+            if (ps.consecutiveWins > ps.maxConsecutiveWins) {
+              ps.maxConsecutiveWins = ps.consecutiveWins;
+            }
+            
+            // Check if eliminated 3+ players
+            if (losers >= 3) {
+              ps.playersEliminated++;
+            }
+          } else {
+            ps.consecutiveWins = 0;
+          }
+          
+          // Track no-bust streak
+          if (r.winnings >= 0) {
+            ps.consecutiveNoBust++;
+            if (ps.consecutiveNoBust > ps.maxConsecutiveNoBust) {
+              ps.maxConsecutiveNoBust = ps.consecutiveNoBust;
+            }
+          } else {
+            ps.consecutiveNoBust = 0;
+          }
+          
+          if (r.winnings > ps.biggestWin) {
+            ps.biggestWin = r.winnings;
+          }
+          if (r.winnings < ps.biggestLoss) {
+            ps.biggestLoss = r.winnings;
+          }
+          
+          // Track monthly winnings
+          const [year, month] = night.date.split('-');
+          const monthKey = `${year}-${month}`;
+          ps.monthlyWinnings[monthKey] = (ps.monthlyWinnings[monthKey] || 0) + r.winnings;
+        });
+      });
+      
+      // Generate achievements for each player
+      Object.keys(playerStats).forEach(playerName => {
+        const ps = playerStats[playerName];
+        const winRate = ps.games > 0 ? Math.round((ps.wins / ps.games) * 100) : 0;
+        
+        // 🎯 Welcome to Club
+        if (ps.games >= 1) {
+          achievements.push({
+            icon: '🎯',
+            name: 'Welcome to Club',
+            player: playerName,
+            description: `Played their first game`,
+            date: sortedNights.find(n => n.results.some(r => r.player === playerName))?.date || 'Unknown',
+            category: 'milestone'
+          });
+        }
+        
+        // 🎲 Veteran Player
+        if (ps.games >= 10) {
+          achievements.push({
+            icon: '🎲',
+            name: 'Veteran Player',
+            player: playerName,
+            description: `Played ${ps.games} games`,
+            date: 'Season',
+            category: 'experience'
+          });
+        }
+        
+        // ⭐ Dedication
+        if (ps.games >= 50) {
+          achievements.push({
+            icon: '⭐',
+            name: 'Dedication',
+            player: playerName,
+            description: `Played ${ps.games} games`,
+            date: 'Season',
+            category: 'experience'
+          });
+        }
+        
+        // 🏆 High Roller
+        if (ps.games >= 5 && winRate >= 60) {
+          achievements.push({
+            icon: '🏆',
+            name: 'High Roller',
+            player: playerName,
+            description: `${winRate}% win rate over ${ps.games} games`,
+            date: 'Season',
+            category: 'skill'
+          });
+        }
+        
+        // 🔥 Hot Streak
+        if (ps.maxConsecutiveWins >= 3) {
+          achievements.push({
+            icon: '🔥',
+            name: 'Hot Streak',
+            player: playerName,
+            description: `${ps.maxConsecutiveWins} consecutive wins`,
+            date: 'Season',
+            category: 'streak'
+          });
+        }
+        
+        // 💰 Big Winner
+        if (ps.biggestWin >= 100) {
+          achievements.push({
+            icon: '💰',
+            name: 'Big Winner',
+            player: playerName,
+            description: `Won $${ps.biggestWin.toFixed(2)} in a single night`,
+            date: sortedNights.find(n => n.results.some(r => r.player === playerName && r.winnings === ps.biggestWin))?.date || 'Unknown',
+            category: 'money'
+          });
+        }
+        
+        // 💎 Profit Master
+        if (ps.totalWinnings >= 500) {
+          achievements.push({
+            icon: '💎',
+            name: 'Profit Master',
+            player: playerName,
+            description: `Total winnings: $${ps.totalWinnings.toFixed(2)}`,
+            date: 'Season',
+            category: 'money'
+          });
+        }
+        
+        // 💀 Grim Reaper
+        if (ps.playersEliminated >= 1) {
+          achievements.push({
+            icon: '💀',
+            name: 'Grim Reaper',
+            player: playerName,
+            description: `Eliminated 3+ players in ${ps.playersEliminated} night${ps.playersEliminated !== 1 ? 's' : ''}`,
+            date: 'Season',
+            category: 'dominance'
+          });
+        }
+        
+        // 🔒 Fortress
+        if (ps.maxConsecutiveNoBust >= 5) {
+          achievements.push({
+            icon: '🔒',
+            name: 'Fortress',
+            player: playerName,
+            description: `${ps.maxConsecutiveNoBust} games without going bust`,
+            date: 'Season',
+            category: 'consistency'
+          });
+        }
+        
+        // 🏦 Bankroll Builder
+        const monthKeys = Object.keys(ps.monthlyWinnings).sort();
+        let consecutivePositive = 0;
+        let maxConsecutivePositive = 0;
+        
+        monthKeys.forEach(monthKey => {
+          if (ps.monthlyWinnings[monthKey] > 0) {
+            consecutivePositive++;
+            if (consecutivePositive > maxConsecutivePositive) {
+              maxConsecutivePositive = consecutivePositive;
+            }
+          } else {
+            consecutivePositive = 0;
+          }
+        });
+        
+        if (maxConsecutivePositive >= 3) {
+          achievements.push({
+            icon: '🏦',
+            name: 'Bankroll Builder',
+            player: playerName,
+            description: `${maxConsecutivePositive} consecutive positive months`,
+            date: 'Season',
+            category: 'consistency'
+          });
+        }
+        
+        // 🎂 Anniversary Achievements
+        if (playerInfo[playerName] && playerInfo[playerName].dateAdded) {
+          const dateAdded = new Date(playerInfo[playerName].dateAdded);
+          const yearsSince = Math.floor((currentDate - dateAdded) / (365.25 * 24 * 60 * 60 * 1000));
+          
+          if (yearsSince >= 1 && yearsSince <= 10) {
+            achievements.push({
+              icon: '🎂',
+              name: `${yearsSince} Year Anniversary`,
+              player: playerName,
+              description: `Member since ${dateAdded.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`,
+              date: formatDate(playerInfo[playerName].dateAdded.split('T')[0]),
+              category: 'anniversary',
+              isAnniversary: true
+            });
+          }
+        }
+      });
+      
+      // Sort achievements by date (most recent first), then by category
+      return achievements.sort((a, b) => {
+        if (a.date === 'Season' && b.date !== 'Season') return 1;
+        if (a.date !== 'Season' && b.date === 'Season') return -1;
+        if (a.date === 'Season' && b.date === 'Season') return 0;
+        return new Date(b.date) - new Date(a.date);
+      });
+    }
+
+    function displayAchievements(achievements) {
+      if (achievements.length === 0) {
+        document.getElementById('achievementsList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🎖️</div>
+            <div style="font-size: 18px; color: var(--text-secondary);">No achievements yet</div>
+            <div style="font-size: 14px; color: var(--text-secondary); margin-top: 10px;">Keep playing to unlock badges!</div>
+          </div>
+        `;
+        return;
+      }
+      
+      const html = achievements.map(a => `
+        <div class="achievement-badge ${a.isAnniversary ? 'anniversary' : ''}">
+          <div class="achievement-icon">${a.icon}</div>
+          <div class="achievement-info">
+            <div class="achievement-name">${a.name}</div>
+            <div class="achievement-player">${a.player}</div>
+            <div class="achievement-desc">${a.description}</div>
+            <div class="achievement-date">${formatDate(a.date)}</div>
+          </div>
+        </div>
+      `).join('');
+      
+      document.getElementById('achievementsList').innerHTML = html;
+    }
+
+    function displayAchievementStats(achievements) {
+      const categories = {
+        milestone: 0,
+        experience: 0,
+        skill: 0,
+        streak: 0,
+        money: 0,
+        dominance: 0,
+        consistency: 0,
+        anniversary: 0
+      };
+      
+      achievements.forEach(a => {
+        if (categories[a.category] !== undefined) {
+          categories[a.category]++;
+        }
+      });
+      
+      const uniquePlayers = new Set(achievements.map(a => a.player)).size;
+      
+      const statsHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${achievements.length}</div>
+          <div class="stat-label">Total Achievements</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${uniquePlayers}</div>
+          <div class="stat-label">Players with Badges</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${categories.anniversary}</div>
+          <div class="stat-label">Anniversaries</div>
+        </div>
+      `;
+      
+      document.getElementById('achievementStats').innerHTML = statsHTML;
+    }
+
+    function formatDate(dateStr) {
+      if (dateStr === 'Season' || dateStr === 'Unknown') return dateStr;
+      
+      const [year, month, day] = dateStr.split('-');
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>

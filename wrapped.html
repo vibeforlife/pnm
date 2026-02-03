@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poker Night Manager - Wrapped</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-dark: #0a0e27;
+      --primary-blue: #1a1f4d;
+      --accent-purple: #6366f1;
+      --accent-cyan: #06b6d4;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 15px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-small {
+      font-size: 24px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+    }
+
+    .group-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .icon-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 18px;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.1);
+    }
+
+    /* Container */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Glass Card */
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Wrapped Player Card */
+    .wrapped-player-card {
+      background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .wrapped-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .wrapped-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .wrapped-period {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+    }
+
+    .wrapped-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .wrapped-stat-card {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .wrapped-stat-value {
+      font-size: 4em;
+      font-weight: 800;
+      color: white;
+      line-height: 1;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .wrapped-stat-label {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .wrapped-section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .wrapped-highlights {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .wrapped-highlight-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 15px;
+    }
+
+    .wrapped-highlight-item:last-child {
+      border-bottom: none;
+    }
+
+    .wrapped-achievements {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .achievement-pill {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 8px 16px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Fortune Cookie */
+    .fortune-cookie-container {
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px dashed #f39c12;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fortune-cookie-container:hover {
+      background: rgba(0, 0, 0, 0.4);
+      border-color: #e74c3c;
+      transform: scale(1.02);
+    }
+
+    .fortune-cookie-icon {
+      font-size: 5em;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+
+    .fortune-cookie-text {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .fortune-revealed {
+      background: linear-gradient(135deg, rgba(241, 196, 15, 0.3), rgba(230, 126, 34, 0.3));
+      border: 2px solid #f39c12;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fortuneReveal 0.8s ease-out;
+    }
+
+    .fortune-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .fortune-author {
+      font-size: 14px;
+      font-style: italic;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .fortune-suits {
+      font-size: 24px;
+      margin-top: 15px;
+      opacity: 0.6;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
+
+    @keyframes break {
+      0% { transform: scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: scale(1.5) rotate(20deg); opacity: 0; }
+    }
+
+    @keyframes fortuneReveal {
+      0% { opacity: 0; transform: translateY(30px) scale(0.5); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .shake {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    .break {
+      animation: break 0.5s ease-in-out forwards;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 15px;
+      opacity: 0.3;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      .wrapped-stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .wrapped-stat-value {
+        font-size: 3em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-small">♠♥</div>
+      <div>
+        <div class="group-name" id="headerGroupName">Loading...</div>
+      </div>
+    </div>
+    <div>
+      <div class="icon-btn" onclick="window.location.href='admin.html?group=' + groupId" title="Back to Admin">
+        ←
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="glass-card">
+      <div class="card-title">🎁 Poker Wrapped</div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Period</label>
+          <select class="form-select" id="wrappedPeriodSelect" onchange="loadWrapped()">
+            <option value="ytd">Year to Date</option>
+            <option value="lifetime">Lifetime</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Player</label>
+          <select class="form-select" id="wrappedPlayerSelect" onchange="loadWrapped()">
+            <option value="all">All Players</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="wrappedContent"></div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRFKc8fr96RNryd9r7OOco-xoQlf_ZcFg",
+      authDomain: "pnm-fx2.firebaseapp.com",
+      projectId: "pnm-fx2",
+      storageBucket: "pnm-fx2.firebasestorage.app",
+      messagingSenderId: "186393450910",
+      appId: "1:186393450910:web:1acfae1bee6e46b718de8f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.firestore = { doc, getDoc, onSnapshot };
+    window.firebaseReady = true;
+    
+    if (window.init) {
+      window.init();
+    }
+  </script>
+
+  <script>
+    let groupData = null;
+    let groupId = null;
+
+    async function init() {
+      if (!window.firebaseReady || !window.db) {
+        setTimeout(init, 100);
+        return;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      groupId = urlParams.get('group');
+
+      if (!groupId) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      await loadGroupData();
+
+      // Real-time listener
+      const groupRef = window.firestore.doc(window.db, 'groups', groupId);
+      window.firestore.onSnapshot(groupRef, (doc) => {
+        if (doc.exists()) {
+          groupData = doc.data();
+          populatePlayerDropdown();
+          loadWrapped();
+        }
+      });
+    }
+
+    async function loadGroupData() {
+      try {
+        const groupRef = window.firestore.doc(window.db, 'groups', groupId);
+        const groupSnap = await window.firestore.getDoc(groupRef);
+
+        if (!groupSnap.exists()) {
+          alert('Group not found');
+          window.location.href = 'index.html';
+          return;
+        }
+
+        groupData = groupSnap.data();
+        
+        if (!groupData.players) groupData.players = [];
+        if (!groupData.nights) groupData.nights = [];
+        if (!groupData.settings) groupData.settings = { currency: '$', defaultBuyIn: 20 };
+
+        document.getElementById('headerGroupName').textContent = groupData.name;
+        
+        // Populate player dropdown ONCE
+        populatePlayerDropdown();
+
+        loadWrapped();
+      } catch (error) {
+        console.error('Error loading group:', error);
+      }
+    }
+
+    function populatePlayerDropdown() {
+      const playerSelect = document.getElementById('wrappedPlayerSelect');
+      
+      // Clear existing options except "All Players"
+      while (playerSelect.options.length > 1) {
+        playerSelect.remove(1);
+      }
+      
+      // Add players
+      groupData.players.forEach(player => {
+        const option = document.createElement('option');
+        option.value = player;
+        option.textContent = player;
+        playerSelect.appendChild(option);
+      });
+    }
+
+    function loadWrapped() {
+      if (!groupData) return;
+      
+      const period = document.getElementById('wrappedPeriodSelect').value;
+      const selectedPlayer = document.getElementById('wrappedPlayerSelect').value;
+      const currentYear = new Date().getFullYear();
+      
+      // Filter nights by period
+      let nights = groupData.nights || [];
+      if (period === 'ytd') {
+        nights = nights.filter(n => {
+          const [year] = n.date.split('-');
+          return parseInt(year) === currentYear;
+        });
+      }
+      
+      if (nights.length === 0) {
+        document.getElementById('wrappedContent').innerHTML = '<div class="empty-state"><div class="empty-icon">🎁</div><div style="font-size: 18px; color: var(--text-secondary);">No data for this period</div></div>';
+        return;
+      }
+      
+      const periodText = period === 'ytd' ? `${currentYear} Year to Date` : 'All Time';
+      
+      if (selectedPlayer === 'all') {
+        const playerStats = calculateWrappedStats(nights);
+        const wrappedHTML = playerStats.map(p => generatePlayerWrapped(p, periodText, playerStats)).join('');
+        document.getElementById('wrappedContent').innerHTML = wrappedHTML;
+      } else {
+        const playerStats = calculateWrappedStats(nights);
+        const playerData = playerStats.find(p => p.name === selectedPlayer);
+        if (playerData) {
+          document.getElementById('wrappedContent').innerHTML = generatePlayerWrapped(playerData, periodText, playerStats);
+        }
+      }
+    }
+
+    function calculateWrappedStats(nights) {
+      const stats = {};
+      
+      nights.forEach(night => {
+        night.results.forEach(r => {
+          if (!stats[r.player]) {
+            stats[r.player] = {
+              totalWinnings: 0,
+              games: 0,
+              wins: 0,
+              losses: 0,
+              biggestWin: 0,
+              biggestLoss: 0,
+              winStreak: 0,
+              currentStreak: 0,
+              opponents: {},
+              monthlyWinnings: {}
+            };
+          }
+          
+          stats[r.player].totalWinnings += r.winnings;
+          stats[r.player].games++;
+          
+          if (r.winnings > 0) {
+            stats[r.player].wins++;
+            stats[r.player].currentStreak++;
+            if (stats[r.player].currentStreak > stats[r.player].winStreak) {
+              stats[r.player].winStreak = stats[r.player].currentStreak;
+            }
+          } else {
+            stats[r.player].losses++;
+            stats[r.player].currentStreak = 0;
+          }
+          
+          if (r.winnings > stats[r.player].biggestWin) {
+            stats[r.player].biggestWin = r.winnings;
+          }
+          if (r.winnings < stats[r.player].biggestLoss) {
+            stats[r.player].biggestLoss = r.winnings;
+          }
+          
+          // Track opponents
+          night.results.forEach(opp => {
+            if (opp.player !== r.player) {
+              stats[r.player].opponents[opp.player] = (stats[r.player].opponents[opp.player] || 0) + 1;
+            }
+          });
+          
+          // Track monthly winnings
+          const [year, month] = night.date.split('-');
+          const monthKey = `${year}-${month}`;
+          stats[r.player].monthlyWinnings[monthKey] = (stats[r.player].monthlyWinnings[monthKey] || 0) + r.winnings;
+        });
+      });
+      
+      return Object.keys(stats).map(name => {
+        const s = stats[name];
+        const favOpponent = Object.keys(s.opponents).length > 0 ? Object.keys(s.opponents).reduce((max, opp) => 
+          s.opponents[opp] > (s.opponents[max] || 0) ? opp : max, Object.keys(s.opponents)[0]) : 'N/A';
+        
+        const bestMonth = Object.keys(s.monthlyWinnings).length > 0 ? Object.keys(s.monthlyWinnings).reduce((max, month) =>
+          s.monthlyWinnings[month] > (s.monthlyWinnings[max] || -Infinity) ? month : max, null) : null;
+        
+        return {
+          name,
+          ...s,
+          winRate: s.games > 0 ? Math.round((s.wins / s.games) * 100) : 0,
+          avgPerGame: s.games > 0 ? s.totalWinnings / s.games : 0,
+          favoriteOpponent: favOpponent,
+          bestMonth: bestMonth,
+          bestMonthWinnings: bestMonth ? s.monthlyWinnings[bestMonth] : 0
+        };
+      }).sort((a, b) => b.totalWinnings - a.totalWinnings);
+    }
+
+    function generatePlayerWrapped(player, periodText, allPlayers) {
+      const ranking = allPlayers.findIndex(p => p.name === player.name) + 1;
+      const currency = groupData.settings?.currency || '$';
+      
+      return `
+        <div class="wrapped-player-card">
+          <div class="wrapped-header">
+            <div class="wrapped-title">🎁 ${player.name} Poker Wrapped</div>
+            <div class="wrapped-period">${periodText}</div>
+          </div>
+          
+          <div class="wrapped-stats-grid">
+            <div class="wrapped-stat-card">
+              <div class="wrapped-stat-value">${player.games}</div>
+              <div class="wrapped-stat-label">Games Played</div>
+            </div>
+            <div class="wrapped-stat-card">
+              <div class="wrapped-stat-value">${currency}${Math.abs(player.totalWinnings).toFixed(0)}</div>
+              <div class="wrapped-stat-label">Total ${player.totalWinnings >= 0 ? 'Winnings' : 'Losses'}</div>
+            </div>
+            <div class="wrapped-stat-card">
+              <div class="wrapped-stat-value">${player.winRate}%</div>
+              <div class="wrapped-stat-label">Win Rate</div>
+            </div>
+            <div class="wrapped-stat-card">
+              <div class="wrapped-stat-value">#${ranking}</div>
+              <div class="wrapped-stat-label">Ranking</div>
+            </div>
+          </div>
+          
+          <div class="wrapped-section-title">✨ Highlights</div>
+          <div class="wrapped-highlights">
+            <div class="wrapped-highlight-item">
+              <span>🎯 Biggest Win</span>
+              <span style="font-weight: 700; color: #2ecc71;">${currency}${player.biggestWin.toFixed(2)}</span>
+            </div>
+            <div class="wrapped-highlight-item">
+              <span>📉 Biggest Loss</span>
+              <span style="font-weight: 700; color: #e74c3c;">${currency}${Math.abs(player.biggestLoss).toFixed(2)}</span>
+            </div>
+            <div class="wrapped-highlight-item">
+              <span>🔥 Best Streak</span>
+              <span style="font-weight: 700;">+${player.winStreak} win${player.winStreak !== 1 ? 's' : ''}</span>
+            </div>
+            <div class="wrapped-highlight-item">
+              <span>🎮 Favorite Opponent</span>
+              <span style="font-weight: 700;">${player.favoriteOpponent}</span>
+            </div>
+            <div class="wrapped-highlight-item">
+              <span>📅 Best Month</span>
+              <span style="font-weight: 700;">${player.bestMonth ? formatMonthYear(player.bestMonth) : 'N/A'} (${currency}${player.bestMonthWinnings.toFixed(2)})</span>
+            </div>
+            <div class="wrapped-highlight-item">
+              <span>💰 Average per Game</span>
+              <span style="font-weight: 700;">${currency}${player.avgPerGame.toFixed(2)}</span>
+            </div>
+          </div>
+          
+          <div class="wrapped-section-title">🏆 Achievements Unlocked</div>
+          <div class="wrapped-achievements">
+            ${generateWrappedAchievements(player).map(a => `
+              <div class="achievement-pill">${a}</div>
+            `).join('')}
+          </div>
+          
+          <div class="wrapped-section-title">🥠 Your Fortune</div>
+          <div class="fortune-cookie-container" id="fortune-${player.name.replace(/\s+/g, '-')}" onclick="openFortuneCookie('${player.name.replace(/\s+/g, '-')}')">
+            <div class="fortune-cookie-icon">🥠</div>
+            <div class="fortune-cookie-text">Click to open your fortune</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function formatMonthYear(monthStr) {
+      const [year, month] = monthStr.split('-');
+      const date = new Date(year, month - 1);
+      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    }
+
+    function formatCurrency(amount) {
+      const currency = groupData.settings?.currency || '$';
+      return currency + Math.abs(amount).toFixed(2);
+    }
+
+    function generateWrappedAchievements(player) {
+      const achievements = [];
+      
+      if (player.games >= 10) achievements.push('🎲 Veteran Player');
+      if (player.winRate >= 60) achievements.push('🏆 High Roller');
+      if (player.winStreak >= 3) achievements.push('🔥 Hot Streak');
+      if (player.biggestWin >= 100) achievements.push('💰 Big Winner');
+      if (player.totalWinnings >= 500) achievements.push('💎 Profit Master');
+      if (player.games >= 50) achievements.push('⭐ Dedication');
+      
+      return achievements.length > 0 ? achievements : ['🎖️ Rising Star'];
+    }
+
+    const FORTUNES = [
+      "A bold bluff in your future will change the game. 🔮",
+      "The cards you fold today will lead to riches tomorrow. 🎴",
+      "Your next big win comes when you least expect it. ✨",
+      "Patience at the table brings fortune to the wise. 🧘",
+      "The river card holds secrets; trust your instincts. 🌊",
+      "Three of a kind approaches in your near future. 🎰",
+      "Your poker face will be tested soon—stay strong. 😎",
+      "A straight draw awaits; know when to chase it. 🎯",
+      "Fortune favors the aggressive player this month. 💪",
+      "Your nemesis will fall before year's end. ⚔️",
+      "The full house you seek is closer than you think. 🏠",
+      "Beware the trap of pocket aces—humility wins. 🃏",
+      "Your lucky seat is on the dealer's left. 🪑",
+      "A royal flush dances in your destiny. 👑",
+      "The best hand is the one you don't play. 🎭",
+      "Your chip stack grows with every folded ego. 📈",
+      "Bad beats today become lessons for tomorrow. 📚",
+      "The poker gods smile upon the patient. 😇",
+      "Your greatest victory comes from a conservative play. 🛡️",
+      "Trust the odds, but never ignore the reads. 🎲",
+      "The turn card will favor you in three games' time. 🔄",
+      "A small pot today prevents a big loss tomorrow. 🎯",
+      "Your biggest opponent is your own tilt. 🧠",
+      "The chips will flow back to the disciplined. 💎",
+      "A flush draw beckons, but kings lie in wait. ⚠️",
+      "Your fortune changes with the shuffle of cards. 🔀",
+      "The next session brings redemption for past losses. 🌅",
+      "Slow play will trap the aggressive this week. 🪤",
+      "Your reads sharpen with each hand observed. 👁️",
+      "The flop will favor suited connectors soon. 🎪",
+      "A cooler approaches—accept it with grace. ❄️",
+      "Your stack doubles when you trust your gut. 🎰",
+      "The button position is your friend tonight. 🔘",
+      "A stone-cold bluff will work in your favor soon. 🗿",
+      "Your continuation bet will be called—plan accordingly. 📞",
+      "The check-raise is a weapon; wield it wisely. ⚔️",
+      "Your range advantage grows with study. 📖",
+      "A hero call will define your next session. 🦸",
+      "The donkey bet will confuse and conquer. 🫏",
+      "Your implied odds are better than you think. 💭",
+      "A rainbow flop favors the prepared mind. 🌈",
+      "Your position speaks louder than your cards. 📍",
+      "The min-raise hides strength in your future. 💪",
+      "A limp will cost you dearly this month. 🚶",
+      "Your all-in will be met with a fold soon. 🎊",
+      "The nuts are not always what they seem. 🥜",
+      "Your equity realizes itself through aggression. ⚡",
+      "A set will crack your overpair—tread carefully. 💔",
+      "Your bankroll management ensures longevity. 💰",
+      "The bad run ends with discipline, not desperation. 🎯",
+      "Your next session favors early position raises. 🌄",
+      "A polarized range will serve you well tonight. ⚖️",
+      "Your value bets are too thin—size up! 📏",
+      "The semi-bluff is your path to profit. 🌓",
+      "Your opponents fear your tight image. 🔒",
+      "A loose table calls for patient value. 🎣",
+      "Your blockers matter more than you realize. 🚫",
+      "The ICM pressure will test your resolve. ⏰",
+      "Your fold equity increases with table image. 🖼️",
+      "A double barrel will take down the pot. 🎯",
+      "Your check-back induces a bluff tomorrow. 🎭",
+      "The iso-raise will isolate the fish perfectly. 🐟",
+      "Your 3-bet range needs more balance. ⚖️",
+      "A delayed c-bet will maximize value soon. ⏳",
+      "Your river decision makes or breaks the night. 🌊",
+      "The board texture favors your holdings tonight. 🎨",
+      "Your pot control will save chips this week. 🛡️",
+      "A float play will win you an unexpected pot. 🎈",
+      "Your squeeze play is coming—timing is key. 🤏",
+      "The overbet will get called; proceed with caution. ⚠️",
+      "Your hand reading improves with every showdown. 🔍",
+      "A block bet will save you from a tough decision. 🧱",
+      "Your probe bet will gather valuable information. 🔬",
+      "The donk bet will confuse your next opponent. 🎪",
+      "Your bet sizing tells a story—make it compelling. 📖",
+      "A merge range will balance your strategy. 🔀",
+      "Your c-bet frequency is predictable—mix it up! 🎲",
+      "The double-suited hand will hit harder than expected. 💥",
+      "Your gap concept needs refinement. 📐",
+      "A well-timed check will induce maximum value. ✅",
+      "Your aggression factor is your secret weapon. 🗡️",
+      "The suited ace will betray you—play cautiously. 🃏",
+      "Your continuation range is too wide; tighten up! 🎯",
+      "A runner-runner will save you when hope seems lost. 🏃",
+      "Your fold to 3-bet is too high—defend more! 🛡️",
+      "The pocket pair will set mine successfully tonight. ⛏️",
+      "Your steal attempts increase with stack depth. 📊",
+      "A polarizing river bet will get paid. 💸",
+      "Your opponents can't put you on a hand—good! 🎭",
+      "The suited connector will flop a monster soon. 🐉",
+      "Your GTO knowledge is a shield, not a sword. 🛡️",
+      "A leveling war approaches—stay one step ahead. 🧠",
+      "Your table selection matters more than card luck. 🎯",
+      "The rake will take its toll—play bigger pots! 💰",
+      "Your showdown value is underrated tonight. 💎",
+      "A crying call will be correct in your next session. 😢",
+      "Your range construction determines long-term success. 🏗️",
+      "The variance will even out—trust the process. 📈",
+      "Your mental game is your greatest asset. 🧘‍♂️",
+      "A cooler is coming; don't let it tilt you. 🧊",
+      "Your note-taking will pay dividends soon. 📝",
+      "The Friday night game will test your skills. 🌙",
+      "Your bankroll grows through smart game selection. 🎮"
+    ];
+
+    function openFortuneCookie(playerId) {
+      const container = document.getElementById('fortune-' + playerId);
+      const icon = container.querySelector('.fortune-cookie-icon');
+      
+      // Shake animation
+      icon.classList.add('shake');
+      
+      setTimeout(() => {
+        // Break animation
+        icon.classList.remove('shake');
+        icon.classList.add('break');
+        
+        setTimeout(() => {
+          // Get random fortune
+          const fortune = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+          
+          // Replace with fortune
+          container.innerHTML = `
+            <div style="font-size: 32px; margin-bottom: 15px;">✨</div>
+            <div class="fortune-text">${fortune}</div>
+            <div class="fortune-author">— Ancient Poker Wisdom</div>
+            <div class="fortune-suits">♠ ♥ ♦ ♣</div>
+          `;
+          container.className = 'fortune-revealed';
+          container.onclick = null;
+        }, 500);
+      }, 500);
+    }
+
+    // Initialize on load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>

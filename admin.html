@@ -1,0 +1,2805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poker Night Manager - Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-dark: #0a0e27;
+      --primary-blue: #1a1f4d;
+      --accent-purple: #6366f1;
+      --accent-cyan: #06b6d4;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-blue) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 15px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo-small {
+      font-size: 24px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+    }
+
+    .group-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .group-code {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 18px;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.1);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tabs::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .tabs::-webkit-scrollbar-track {
+      background: var(--glass-bg);
+      border-radius: 2px;
+    }
+
+    .tabs::-webkit-scrollbar-thumb {
+      background: var(--accent-purple);
+      border-radius: 2px;
+    }
+
+    .tab {
+      padding: 12px 20px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+    }
+
+    .tab:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      border-color: transparent;
+      color: white;
+      box-shadow: 0 5px 20px rgba(99, 102, 241, 0.3);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Glass Card */
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Outfit', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      color: white;
+      box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-secondary {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-small {
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* Table */
+    .table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    th {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Player Card */
+    .player-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .player-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(5px);
+    }
+
+    .player-info {
+      flex: 1;
+    }
+
+    .player-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .player-stats {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .player-winnings {
+      font-size: 20px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .player-winnings.positive {
+      color: var(--success);
+    }
+
+    .player-winnings.negative {
+      color: var(--error);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 14, 39, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal-content {
+      background: var(--primary-blue);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 25px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: scaleIn 0.3s ease-out;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .modal-close {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: var(--text-primary);
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
+    }
+
+    /* Achievement Badge */
+    .achievement-badge {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.1));
+      border: 1px solid var(--accent-purple);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .achievement-icon {
+      font-size: 36px;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .achievement-info {
+      flex: 1;
+    }
+
+    .achievement-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .achievement-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .achievement-date {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-icon {
+      font-size: 64px;
+      margin-bottom: 15px;
+      opacity: 0.3;
+    }
+
+    .empty-text {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--success);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.error {
+      background: var(--error);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tabs {
+        gap: 6px;
+      }
+
+      .tab {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      th, td {
+        padding: 10px 8px;
+      }
+    }
+
+    /* Wrapped Styles */
+    .wrapped-player-card {
+      background: linear-gradient(135deg, #f39c12 0%, #e74c3c 100%);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .wrapped-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .wrapped-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .wrapped-period {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 600;
+    }
+
+    .wrapped-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .wrapped-stat-card {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .wrapped-stat-value {
+      font-size: 4em;
+      font-weight: 800;
+      color: white;
+      line-height: 1;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .wrapped-stat-label {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .wrapped-section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .wrapped-highlights {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .wrapped-highlight-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 15px;
+    }
+
+    .wrapped-highlight-item:last-child {
+      border-bottom: none;
+    }
+
+    .wrapped-achievements {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .achievement-pill {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 8px 16px;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Fortune Cookie */
+    .fortune-cookie-container {
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px dashed #f39c12;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fortune-cookie-container:hover {
+      background: rgba(0, 0, 0, 0.4);
+      border-color: #e74c3c;
+      transform: scale(1.02);
+    }
+
+    .fortune-cookie-icon {
+      font-size: 5em;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+
+    .fortune-cookie-text {
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .fortune-revealed {
+      background: linear-gradient(135deg, rgba(241, 196, 15, 0.3), rgba(230, 126, 34, 0.3));
+      border: 2px solid #f39c12;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fortuneReveal 0.8s ease-out;
+    }
+
+    .fortune-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .fortune-author {
+      font-size: 14px;
+      font-style: italic;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .fortune-suits {
+      font-size: 24px;
+      margin-top: 15px;
+      opacity: 0.6;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-10deg); }
+      75% { transform: rotate(10deg); }
+    }
+
+    @keyframes break {
+      0% { transform: scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: scale(1.5) rotate(20deg); opacity: 0; }
+    }
+
+    @keyframes fortuneReveal {
+      0% { opacity: 0; transform: translateY(30px) scale(0.5); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .shake {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    .break {
+      animation: break 0.5s ease-in-out forwards;
+    }
+
+    /* Chart Container */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin-top: 20px;
+    }
+
+    /* Player result in poker night */
+    .player-result {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+    }
+
+    .player-result input {
+      flex: 1;
+    }
+
+    .remove-player-btn {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo-small">♠♥</div>
+      <div>
+        <div class="group-name" id="headerGroupName">Loading...</div>
+        <div class="group-code" id="headerGroupCode"></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="icon-btn" onclick="window.location.href='index.html'" title="Home">
+        🏠
+      </div>
+      <div class="icon-btn" onclick="openSettings()" title="Settings">
+        ⚙️
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
+      <div class="tab" onclick="switchTab('nights')">🎲 Poker Nights</div>
+      <div class="tab" onclick="switchTab('players')">👥 Players</div>
+      <div class="tab" onclick="switchTab('leaderboard')">🏆 Leaderboard</div>
+      <div class="tab" onclick="window.location.href='achievements-enhanced.html?group=' + groupId">🎖️ Achievements</div>
+      <div class="tab" onclick="switchTab('stats')">📈 Stats</div>
+      <div class="tab" onclick="switchTab('settlement')">💰 Settlement</div>
+      <div class="tab" onclick="window.location.href='wrapped.html?group=' + groupId">🎁 Wrapped</div>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div class="tab-content active" id="dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalNights">0</div>
+          <div class="stat-label">Total Nights</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalPlayers">0</div>
+          <div class="stat-label">Players</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalPot">$0</div>
+          <div class="stat-label">Total Pot</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avgNightPot">$0</div>
+          <div class="stat-label">Avg/Night</div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">Recent Nights</div>
+          <button class="btn btn-primary btn-small" onclick="switchTab('nights')">View All</button>
+        </div>
+        <div id="recentNightsList"></div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">Top Players (YTD)</div>
+          <button class="btn btn-primary btn-small" onclick="switchTab('leaderboard')">View All</button>
+        </div>
+        <div id="topPlayersList"></div>
+      </div>
+    </div>
+
+    <!-- Poker Nights Tab -->
+    <div class="tab-content" id="nights">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">Poker Nights</div>
+          <button class="btn btn-primary btn-small" onclick="openAddNightModal()">➕ Add Night</button>
+        </div>
+        
+        <!-- Search and Sort Controls -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+          <input type="text" class="form-input" id="nightsSearch" placeholder="🔍 Search by date or location..." oninput="loadNights()">
+          <select class="form-select" id="nightsSort" onchange="loadNights()">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="pot-high">Pot Size (High-Low)</option>
+            <option value="pot-low">Pot Size (Low-High)</option>
+            <option value="location">Location (A-Z)</option>
+            <option value="winner">Winner (A-Z)</option>
+          </select>
+        </div>
+        
+        <div id="nightsList"></div>
+      </div>
+    </div>
+
+    <!-- Players Tab -->
+    <div class="tab-content" id="players">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">Players</div>
+          <button class="btn btn-primary btn-small" onclick="openAddPlayerModal()">➕ Add Player</button>
+        </div>
+        
+        <!-- Search and Sort Controls -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+          <input type="text" class="form-input" id="playersSearch" placeholder="🔍 Search players..." oninput="loadPlayers()">
+          <select class="form-select" id="playersSort" onchange="loadPlayers()">
+            <option value="winnings">Total Winnings (High-Low)</option>
+            <option value="a-z">Name (A-Z)</option>
+            <option value="z-a">Name (Z-A)</option>
+            <option value="games">Games Played (High-Low)</option>
+            <option value="wins">Wins (High-Low)</option>
+            <option value="winrate">Win Rate (High-Low)</option>
+          </select>
+        </div>
+        
+        <div id="playersList"></div>
+      </div>
+    </div>
+
+    <!-- Leaderboard Tab -->
+    <div class="tab-content" id="leaderboard">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">Leaderboard</div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <select class="form-select" id="leaderboardYearSelect" onchange="loadLeaderboard()">
+            <option value="ytd">Year to Date</option>
+            <option value="lifetime">Lifetime</option>
+          </select>
+        </div>
+        
+        <div class="chart-container">
+          <canvas id="leaderboardChart"></canvas>
+        </div>
+        <div id="leaderboardList" style="margin-top: 20px;"></div>
+      </div>
+    </div>
+
+    <!-- Achievements Tab -->
+    <div class="tab-content" id="achievements">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title">Achievements</div>
+          <button class="btn btn-primary btn-small" onclick="window.location.href='achievements-enhanced.html?group=' + groupId">
+            View All →
+          </button>
+        </div>
+        <div id="achievementsList"></div>
+      </div>
+    </div>
+
+    <!-- Stats Tab -->
+    <div class="tab-content" id="stats">
+      <div class="glass-card">
+        <div class="card-title">Lifetime Statistics</div>
+        <div id="lifetimeStats"></div>
+      </div>
+    </div>
+
+    <!-- Settlement Tab -->
+    <div class="tab-content" id="settlement">
+      <div class="glass-card">
+        <div class="card-title">Settlement Calculator</div>
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end;">
+          <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label class="form-label">Period</label>
+            <select class="form-select" id="settlementPeriodSelect" onchange="loadSettlement()">
+              <option value="ytd">Year to Date</option>
+              <option value="unsettled">Unsettled Only</option>
+              <option value="lifetime">Lifetime</option>
+            </select>
+          </div>
+          <button class="btn btn-secondary btn-small" onclick="markAllSettled()">
+            ✓ Mark All Settled
+          </button>
+        </div>
+        <div id="settlementList"></div>
+      </div>
+    </div>
+
+    <!-- Wrapped Tab -->
+    <div class="tab-content" id="wrapped">
+      <div class="glass-card">
+        <div class="card-title">🎁 Poker Wrapped</div>
+        <div style="text-align: center; padding: 40px 20px;">
+          <div style="font-size: 64px; margin-bottom: 20px;">🎁</div>
+          <div style="font-size: 20px; font-weight: 600; margin-bottom: 15px;">View Your Year in Review</div>
+          <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 25px;">
+            See detailed player stats, achievements, and fortune cookies!
+          </div>
+          <button class="btn btn-primary" onclick="window.location.href='wrapped.html?group=' + groupId">
+            Open Wrapped →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Night Modal -->
+  <div class="modal" id="addNightModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Add Poker Night</div>
+        <button class="modal-close" onclick="closeModal('addNightModal')">×</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-input" id="nightDate">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Location (Optional)</label>
+        <input type="text" class="form-input" id="nightLocation" placeholder="John's House">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Buy-in Amount</label>
+        <input type="number" class="form-input" id="nightBuyIn" value="20" min="1">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Player Results</label>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
+          Enter total buy-in (including rebuys) and final cash out for each player
+        </div>
+        <div id="nightPlayersContainer"></div>
+        <button class="btn btn-secondary btn-small" onclick="addPlayerResult()" style="margin-top: 10px;">➕ Add Player</button>
+        
+        <!-- Balance Check -->
+        <div id="balanceCheck" style="margin-top: 15px; padding: 15px; border-radius: 12px; text-align: center; font-weight: 700; font-size: 16px; display: none;">
+          <div style="font-size: 13px; font-weight: 600; margin-bottom: 5px; opacity: 0.8;">Balance Check</div>
+          <div id="balanceAmount"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Expenses (Optional)</label>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">Track who paid for food, drinks, or prizes</div>
+        <div id="nightExpensesContainer"></div>
+        <button class="btn btn-secondary btn-small" onclick="addExpense()" style="margin-top: 10px;">➕ Add Expense</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes (Optional)</label>
+        <textarea class="form-textarea" id="nightNotes" placeholder="Epic comeback by John..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="saveNight()" style="width: 100%; margin-bottom: 10px;">Save Night</button>
+      <button class="btn btn-secondary" onclick="calculateSettlement()" style="width: 100%;" id="settleButton">💰 Calculate Settlement</button>
+    </div>
+  </div>
+
+  <!-- Add Player Modal -->
+  <div class="modal" id="addPlayerModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Add Player</div>
+        <button class="modal-close" onclick="closeModal('addPlayerModal')">×</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Player Name</label>
+        <input type="text" class="form-input" id="playerName" placeholder="Enter name">
+      </div>
+
+      <button class="btn btn-primary" onclick="savePlayer()" style="width: 100%;">Add Player</button>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Settings</div>
+        <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Currency Symbol</label>
+        <input type="text" class="form-input" id="settingsCurrency" value="$" maxlength="3">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Default Buy-in</label>
+        <input type="number" class="form-input" id="settingsDefaultBuyIn" value="20" min="1">
+      </div>
+
+      <button class="btn btn-primary" onclick="saveSettings()" style="width: 100%; margin-bottom: 10px;">Save Settings</button>
+      
+      <hr style="border-color: var(--glass-border); margin: 20px 0;">
+      
+      <button class="btn btn-secondary" onclick="exportData()" style="width: 100%; margin-bottom: 10px;">📥 Export Data</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="width: 100%;">📤 Import Data</button>
+      <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRFKc8fr96RNryd9r7OOco-xoQlf_ZcFg",
+      authDomain: "pnm-fx2.firebaseapp.com",
+      projectId: "pnm-fx2",
+      storageBucket: "pnm-fx2.firebasestorage.app",
+      messagingSenderId: "186393450910",
+      appId: "1:186393450910:web:1acfae1bee6e46b718de8f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Make Firebase available globally
+    window.db = db;
+    window.firestore = { doc, getDoc, updateDoc, onSnapshot };
+    
+    // Signal that Firebase is ready
+    window.firebaseReady = true;
+    
+    // Start the app if init is already defined
+    if (window.init) {
+      window.init();
+    }
+  </script>
+
+  <script>
+    // Global state
+    let groupData = null;
+    let groupId = null;
+    let leaderboardChart = null;
+
+    // Initialize
+    async function init() {
+      console.log('Init called, checking Firebase...');
+      
+      // Wait for Firebase to be ready
+      if (!window.firebaseReady || !window.db || !window.firestore) {
+        console.log('Firebase not ready, waiting...');
+        setTimeout(init, 100);
+        return;
+      }
+      
+      console.log('Firebase ready, proceeding...');
+      
+      // Get group ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      groupId = urlParams.get('group');
+
+      if (!groupId) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Load group data
+      await loadGroupData();
+
+      // Set up real-time listener
+      const groupRef = window.firestore.doc(window.db, 'groups', groupId);
+      window.firestore.onSnapshot(groupRef, (doc) => {
+        if (doc.exists()) {
+          groupData = doc.data();
+          updateUI();
+        }
+      });
+    }
+
+    async function loadGroupData() {
+      try {
+        const groupRef = window.firestore.doc(window.db, 'groups', groupId);
+        const groupSnap = await window.firestore.getDoc(groupRef);
+
+        if (!groupSnap.exists()) {
+          alert('Group not found');
+          window.location.href = 'index.html';
+          return;
+        }
+
+        groupData = groupSnap.data();
+        
+        // Initialize default structure if needed
+        if (!groupData.players) groupData.players = [];
+        if (!groupData.nights) groupData.nights = [];
+        if (!groupData.archivedYears) groupData.archivedYears = {};
+        if (!groupData.currentYear) groupData.currentYear = new Date().getFullYear();
+        if (!groupData.settings) groupData.settings = { currency: '$', defaultBuyIn: 20 };
+
+        updateUI();
+      } catch (error) {
+        console.error('Error loading group:', error);
+        showToast('Error loading group data', true);
+      }
+    }
+
+    function updateUI() {
+      if (!groupData) return;
+
+      // Update header
+      document.getElementById('headerGroupName').textContent = groupData.name;
+      document.getElementById('headerGroupCode').textContent = groupData.id;
+
+      // Update dashboard
+      updateDashboard();
+      
+      // Update current tab
+      const activeTab = document.querySelector('.tab.active');
+      if (activeTab) {
+        const tabName = activeTab.textContent.toLowerCase();
+        if (tabName.includes('dashboard')) updateDashboard();
+        else if (tabName.includes('nights')) loadNights();
+        else if (tabName.includes('players')) loadPlayers();
+        else if (tabName.includes('leaderboard')) loadLeaderboard();
+        else if (tabName.includes('achievements')) loadAchievements();
+        else if (tabName.includes('stats')) loadStats();
+        else if (tabName.includes('settlement')) loadSettlement();
+        else if (tabName.includes('wrapped')) loadWrapped();
+      }
+    }
+
+    function updateDashboard() {
+      const nights = groupData.nights || [];
+      const players = groupData.players || [];
+      
+      // Calculate stats
+      document.getElementById('totalNights').textContent = nights.length;
+      document.getElementById('totalPlayers').textContent = players.length;
+      
+      // Calculate total pot as actual buy-in amounts (chips on table)
+      const totalPot = nights.reduce((sum, night) => {
+        const nightPot = night.results.reduce((s, r) => {
+          // Use totalBuyIn if available, otherwise use night's buyIn
+          const buyIn = r.totalBuyIn !== undefined ? r.totalBuyIn : night.buyIn;
+          return s + buyIn;
+        }, 0);
+        return sum + nightPot;
+      }, 0);
+      
+      document.getElementById('totalPot').textContent = formatCurrency(totalPot);
+      document.getElementById('avgNightPot').textContent = formatCurrency(nights.length > 0 ? totalPot / nights.length : 0);
+
+      // Recent nights
+      const recentNights = nights.slice(-5).reverse();
+      const recentNightsHTML = recentNights.length > 0 ? recentNights.map((night, index) => {
+        // Calculate the actual index in the original nights array
+        const actualIndex = nights.length - 1 - index;
+        return `
+          <div class="player-card" onclick="editNight(${actualIndex})" style="cursor: pointer;">
+            <div class="player-info">
+              <div class="player-name">${formatDate(night.date)}</div>
+              <div class="player-stats">${night.location || 'No location'}</div>
+              <div class="player-stats" style="margin-top: 2px;">${night.results.length} players • Buy-in: ${formatCurrency(night.buyIn)}</div>
+            </div>
+            <div class="player-winnings">${formatCurrency(night.buyIn)}</div>
+          </div>
+        `;
+      }).join('') : '<div class="empty-state"><div class="empty-icon">🎲</div><div class="empty-text">No poker nights yet</div></div>';
+      
+      document.getElementById('recentNightsList').innerHTML = recentNightsHTML;
+
+      // Top players
+      const playerStats = calculatePlayerStats();
+      const topPlayers = playerStats.slice(0, 5);
+      const topPlayersHTML = topPlayers.length > 0 ? topPlayers.map((p, i) => `
+        <div class="player-card" onclick="switchTab('leaderboard')" style="cursor: pointer;">
+          <div class="player-info">
+            <div class="player-name">${i + 1}. ${p.name}</div>
+            <div class="player-stats">${p.gamesPlayed} games • ${p.winRate}% win rate</div>
+          </div>
+          <div class="player-winnings ${p.totalWinnings >= 0 ? 'positive' : 'negative'}">
+            ${formatCurrency(p.totalWinnings)}
+          </div>
+        </div>
+      `).join('') : '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">No players yet</div></div>';
+      
+      document.getElementById('topPlayersList').innerHTML = topPlayersHTML;
+    }
+
+    function loadNights() {
+      let nights = (groupData.nights || []).slice();
+      
+      // Search filter
+      const searchTerm = document.getElementById('nightsSearch')?.value.toLowerCase() || '';
+      if (searchTerm) {
+        nights = nights.filter(night => {
+          const dateMatch = night.date.includes(searchTerm) || formatDate(night.date).toLowerCase().includes(searchTerm);
+          const locationMatch = (night.location || '').toLowerCase().includes(searchTerm);
+          return dateMatch || locationMatch;
+        });
+      }
+      
+      // Sort
+      const sortBy = document.getElementById('nightsSort')?.value || 'newest';
+      
+      if (sortBy === 'newest') {
+        nights.sort((a, b) => b.date.localeCompare(a.date));
+      } else if (sortBy === 'oldest') {
+        nights.sort((a, b) => a.date.localeCompare(b.date));
+      } else if (sortBy === 'pot-high' || sortBy === 'pot-low') {
+        nights.sort((a, b) => {
+          const potA = a.results.reduce((sum, r) => sum + (r.totalBuyIn || a.buyIn), 0);
+          const potB = b.results.reduce((sum, r) => sum + (r.totalBuyIn || b.buyIn), 0);
+          return sortBy === 'pot-high' ? potB - potA : potA - potB;
+        });
+      } else if (sortBy === 'location') {
+        nights.sort((a, b) => (a.location || 'zzz').localeCompare(b.location || 'zzz'));
+      } else if (sortBy === 'winner') {
+        nights.sort((a, b) => {
+          const winnerA = a.results.length > 0 ? a.results.reduce((max, r) => r.winnings > max.winnings ? r : max, a.results[0]).player : '';
+          const winnerB = b.results.length > 0 ? b.results.reduce((max, r) => r.winnings > max.winnings ? r : max, b.results[0]).player : '';
+          return winnerA.localeCompare(winnerB);
+        });
+      }
+      
+      const nightsHTML = nights.length > 0 ? nights.map((night, index) => {
+        // Find actual index in original array
+        const actualIndex = groupData.nights.findIndex(n => n.date === night.date && n.location === night.location);
+        const winner = night.results.length > 0 ? night.results.reduce((max, r) => r.winnings > max.winnings ? r : max, night.results[0]) : null;
+        
+        return `
+          <div class="glass-card" style="margin-bottom: 12px;">
+            <div class="card-header">
+              <div>
+                <div class="card-title">${formatDate(night.date)}</div>
+                <div style="font-size: 12px; color: var(--text-secondary);">
+                  ${night.location || 'No location'} • Buy-in: ${formatCurrency(night.buyIn)}
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary btn-small" onclick="editNight(${actualIndex})">✏️</button>
+                <button class="btn btn-danger btn-small" onclick="deleteNight(${actualIndex})">🗑️</button>
+              </div>
+            </div>
+            ${winner ? `
+              <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">
+                Winner: <strong style="color: var(--success);">${winner.player}</strong> (+${formatCurrency(winner.winnings)})
+              </div>
+            ` : ''}
+            ${night.results.length > 0 ? `
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Player</th>
+                      <th>Buy-in</th>
+                      <th>Cash Out</th>
+                      <th>Net</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${night.results.map(r => {
+                      const buyIn = r.totalBuyIn !== undefined ? r.totalBuyIn : night.buyIn;
+                      const cashOut = r.cashOut !== undefined ? r.cashOut : r.winnings + buyIn;
+                      return `
+                        <tr>
+                          <td>${r.player}</td>
+                          <td style="color: var(--text-secondary);">${formatCurrency(buyIn)}</td>
+                          <td style="color: var(--text-secondary);">${formatCurrency(cashOut)}</td>
+                          <td style="color: ${r.winnings >= 0 ? 'var(--success)' : 'var(--error)'}; font-weight: 600;">
+                            ${r.winnings >= 0 ? '+' : ''}${formatCurrency(r.winnings)}
+                          </td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            ` : `
+              <div style="padding: 15px; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); border-radius: 10px; text-align: center; color: var(--text-secondary); font-size: 13px;">
+                No player results yet. Click ✏️ to add players.
+              </div>
+            `}
+            ${night.notes ? `<div style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 13px;">${night.notes}</div>` : ''}
+            ${night.expenses && night.expenses.length > 0 ? `
+              <div style="margin-top: 10px; padding: 10px; background: rgba(6, 182, 212, 0.1); border: 1px solid var(--accent-cyan); border-radius: 8px;">
+                <div style="font-size: 12px; font-weight: 600; color: var(--accent-cyan); margin-bottom: 8px; text-transform: uppercase;">Expenses</div>
+                ${night.expenses.map(e => `
+                  <div style="font-size: 13px; margin-bottom: 4px;">
+                    💵 ${e.paidBy} paid ${formatCurrency(e.amount)} ${e.description ? `• ${e.description}` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('') : searchTerm ? '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">No nights match your search</div></div>' : '<div class="empty-state"><div class="empty-icon">🎲</div><div class="empty-text">No poker nights yet</div><button class="btn btn-primary" onclick="openAddNightModal()">Add First Night</button></div>';
+      
+      document.getElementById('nightsList').innerHTML = nightsHTML;
+    }
+    function loadPlayers() {
+      const players = groupData.players || [];
+      let playerStats = calculatePlayerStats();
+      const playerInfo = groupData.playerInfo || {};
+      
+      // Search filter
+      const searchTerm = document.getElementById('playersSearch')?.value.toLowerCase() || '';
+      if (searchTerm) {
+        playerStats = playerStats.filter(p => p.name.toLowerCase().includes(searchTerm));
+      }
+      
+      // Sort
+      const sortBy = document.getElementById('playersSort')?.value || 'winnings';
+      
+      if (sortBy === 'winnings') {
+        playerStats.sort((a, b) => b.totalWinnings - a.totalWinnings);
+      } else if (sortBy === 'a-z') {
+        playerStats.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortBy === 'z-a') {
+        playerStats.sort((a, b) => b.name.localeCompare(a.name));
+      } else if (sortBy === 'games') {
+        playerStats.sort((a, b) => b.gamesPlayed - a.gamesPlayed);
+      } else if (sortBy === 'wins') {
+        playerStats.sort((a, b) => b.wins - a.wins);
+      } else if (sortBy === 'winrate') {
+        playerStats.sort((a, b) => b.winRate - a.winRate);
+      }
+      
+      const playersHTML = playerStats.length > 0 ? playerStats.map((p) => {
+        // Find actual index for edit/delete
+        const index = players.indexOf(p.name);
+        
+        const dateAdded = playerInfo[p.name]?.dateAdded;
+        const dateAddedText = dateAdded 
+          ? new Date(dateAdded).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+          : 'Unknown';
+        
+        return `
+          <div class="player-card">
+            <div class="player-info">
+              <div class="player-name">${p.name}</div>
+              <div class="player-stats">
+                ${p.gamesPlayed} games • ${p.wins} wins • ${p.winRate}% win rate
+              </div>
+              <div class="player-stats" style="font-size: 11px; margin-top: 4px; opacity: 0.7;">
+                Joined: ${dateAddedText}
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div class="player-winnings ${p.totalWinnings >= 0 ? 'positive' : 'negative'}">
+                ${formatCurrency(p.totalWinnings)}
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 5px; justify-content: flex-end;">
+                <button class="btn btn-secondary btn-small" onclick="editPlayer(${index})">✏️</button>
+                <button class="btn btn-danger btn-small" onclick="deletePlayer(${index})">🗑️</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') : searchTerm ? '<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">No players match your search</div></div>' : '<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-text">No players yet</div><button class="btn btn-primary" onclick="openAddPlayerModal()">Add First Player</button></div>';
+      
+      document.getElementById('playersList').innerHTML = playersHTML;
+    }
+
+    function loadLeaderboard() {
+      // Populate year dropdown if needed
+      const yearSelect = document.getElementById('leaderboardYearSelect');
+      if (yearSelect && yearSelect.options.length === 2) {
+        const years = [...new Set(groupData.nights.map(n => {
+          const [year] = n.date.split('-');
+          return parseInt(year);
+        }))].sort((a, b) => b - a);
+        
+        years.forEach(year => {
+          const option = document.createElement('option');
+          option.value = year;
+          option.textContent = year;
+          yearSelect.appendChild(option);
+        });
+      }
+      
+      const yearFilter = yearSelect?.value || 'ytd';
+      const playerStats = calculatePlayerStats(yearFilter);
+      
+      // Update chart
+      updateLeaderboardChart(playerStats);
+      
+      // Update list
+      const leaderboardHTML = playerStats.map((p, i) => `
+        <div class="player-card">
+          <div style="font-size: 24px; font-weight: 700; min-width: 40px;">
+            ${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
+          </div>
+          <div class="player-info">
+            <div class="player-name">${p.name}</div>
+            <div class="player-stats">
+              ${p.gamesPlayed} games • ${p.wins} wins • ${p.winRate}% win rate
+            </div>
+          </div>
+          <div class="player-winnings ${p.totalWinnings >= 0 ? 'positive' : 'negative'}">
+            ${formatCurrency(p.totalWinnings)}
+          </div>
+        </div>
+      `).join('');
+      
+      document.getElementById('leaderboardList').innerHTML = leaderboardHTML;
+    }
+
+    function updateLeaderboardChart(playerStats) {
+      const ctx = document.getElementById('leaderboardChart');
+      if (!ctx) return;
+
+      if (leaderboardChart) {
+        leaderboardChart.destroy();
+      }
+
+      const top10 = playerStats.slice(0, 10);
+      
+      leaderboardChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: top10.map(p => p.name),
+          datasets: [{
+            label: 'Total Winnings',
+            data: top10.map(p => p.totalWinnings),
+            backgroundColor: top10.map(p => 
+              p.totalWinnings >= 0 ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)'
+            ),
+            borderColor: top10.map(p => 
+              p.totalWinnings >= 0 ? 'rgba(16, 185, 129, 1)' : 'rgba(239, 68, 68, 1)'
+            ),
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255, 255, 255, 0.1)' },
+              ticks: { color: '#cbd5e1' }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#cbd5e1' }
+            }
+          }
+        }
+      });
+    }
+
+    function loadAchievements() {
+      const achievements = calculateAchievements();
+      
+      const achievementsHTML = achievements.length > 0 ? achievements.map(a => `
+        <div class="achievement-badge">
+          <div class="achievement-icon">${a.icon}</div>
+          <div class="achievement-info">
+            <div class="achievement-name">${a.name}</div>
+            <div class="achievement-desc">${a.description}</div>
+            <div class="achievement-date">${a.date}</div>
+          </div>
+        </div>
+      `).join('') : '<div class="empty-state"><div class="empty-icon">🎖️</div><div class="empty-text">No achievements yet</div></div>';
+      
+      document.getElementById('achievementsList').innerHTML = achievementsHTML;
+    }
+
+    function loadStats() {
+      const playerStats = calculatePlayerStats();
+      const nights = groupData.nights || [];
+      
+      const totalGames = nights.length;
+      // Calculate total pot as actual buy-in amounts (chips on table)
+      const totalPot = nights.reduce((sum, night) => {
+        const nightPot = night.results.reduce((s, r) => {
+          const buyIn = r.totalBuyIn !== undefined ? r.totalBuyIn : night.buyIn;
+          return s + buyIn;
+        }, 0);
+        return sum + nightPot;
+      }, 0);
+      
+      const biggestWin = nights.reduce((max, night) => {
+        const nightMax = night.results.reduce((m, r) => r.winnings > m.winnings ? r : m, { winnings: 0 });
+        return nightMax.winnings > max.winnings ? nightMax : max;
+      }, { winnings: 0, player: 'N/A' });
+      
+      const biggestLoss = nights.reduce((min, night) => {
+        const nightMin = night.results.reduce((m, r) => r.winnings < m.winnings ? r : m, { winnings: 0 });
+        return nightMin.winnings < min.winnings ? nightMin : min;
+      }, { winnings: 0, player: 'N/A' });
+
+      const statsHTML = `
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">${totalGames}</div>
+            <div class="stat-label">Total Games</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${playerStats.length}</div>
+            <div class="stat-label">Total Players</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${formatCurrency(totalPot)}</div>
+            <div class="stat-label">Total Money</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${formatCurrency(totalGames > 0 ? totalPot / totalGames : 0)}</div>
+            <div class="stat-label">Avg/Game</div>
+          </div>
+        </div>
+        
+        <div class="glass-card">
+          <div class="card-title">Records</div>
+          <div style="margin-top: 15px;">
+            <div style="margin-bottom: 15px;">
+              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">BIGGEST WIN</div>
+              <div style="font-size: 18px; font-weight: 700; color: var(--success);">
+                ${biggestWin.player} • +${formatCurrency(biggestWin.winnings)}
+              </div>
+            </div>
+            <div>
+              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 5px;">BIGGEST LOSS</div>
+              <div style="font-size: 18px; font-weight: 700; color: var(--error);">
+                ${biggestLoss.player} • ${formatCurrency(biggestLoss.winnings)}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('lifetimeStats').innerHTML = statsHTML;
+    }
+
+    function loadSettlement() {
+      const period = document.getElementById('settlementPeriodSelect').value;
+      const currentYear = new Date().getFullYear();
+      
+      // Filter nights based on period
+      let nights = groupData.nights || [];
+      
+      if (period === 'ytd') {
+        nights = nights.filter(n => {
+          const [year] = n.date.split('-');
+          return parseInt(year) === currentYear;
+        });
+      } else if (period === 'unsettled') {
+        nights = nights.filter(n => !n.settled);
+      }
+      
+      if (nights.length === 0) {
+        document.getElementById('settlementList').innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><div style="font-size: 18px; color: var(--text-secondary);">All settled up!</div></div>';
+        return;
+      }
+      
+      // Calculate balances from nights
+      const balances = {};
+      nights.forEach(night => {
+        night.results.forEach(r => {
+          balances[r.player] = (balances[r.player] || 0) + r.winnings;
+        });
+      });
+      
+      // Generate all transactions needed
+      let allTransactions = calculateTransactions(balances);
+      
+      // Filter out individually settled transactions
+      const settledTransactionsList = groupData.settledTransactions || [];
+      const unsettledTransactions = allTransactions.filter(t => {
+        return !settledTransactionsList.some(st => 
+          st.from === t.from && st.to === t.to && Math.abs(st.amount - t.amount) < 0.01
+        );
+      });
+      
+      // Get settled transactions for display (if not in unsettled-only view)
+      const displaySettledTransactions = period !== 'unsettled' ? settledTransactionsList.filter(st => {
+        // Filter by period if needed
+        if (period === 'ytd') {
+          const settledYear = new Date(st.settledDate).getFullYear();
+          return settledYear === currentYear;
+        }
+        return true; // lifetime shows all
+      }) : [];
+      
+      let html = '';
+      
+      // Show unsettled transactions first
+      if (unsettledTransactions.length > 0) {
+        html += `
+          <div style="margin-bottom: 20px; padding: 15px; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); border-radius: 12px;">
+            <div style="font-size: 14px; font-weight: 600; color: var(--error);">
+              ⚠️ ${unsettledTransactions.length} unpaid transaction${unsettledTransactions.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+          ${unsettledTransactions.map((t, index) => `
+            <div class="player-card" style="border-left: 3px solid var(--error);">
+              <div class="player-info">
+                <div class="player-name">${t.from} → ${t.to}</div>
+                <div class="player-stats" style="color: var(--error);">● Unpaid</div>
+              </div>
+              <div style="text-align: right; display: flex; align-items: center; gap: 10px;">
+                <div class="player-winnings" style="color: var(--error); font-weight: 700;">${formatCurrency(t.amount)}</div>
+                <button class="btn btn-secondary btn-small" onclick="markTransactionSettled('${t.from}', '${t.to}', ${t.amount})">
+                  ✓ Paid
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        `;
+      }
+      
+      // Show settled transactions
+      if (period !== 'unsettled' && displaySettledTransactions.length > 0) {
+        html += `
+          <div style="margin-top: 30px; margin-bottom: 20px; padding: 15px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); border-radius: 12px;">
+            <div style="font-size: 14px; font-weight: 600; color: var(--success);">
+              ✅ ${displaySettledTransactions.length} settled transaction${displaySettledTransactions.length !== 1 ? 's' : ''}
+            </div>
+          </div>
+          ${displaySettledTransactions.slice().reverse().map((t, index) => `
+            <div class="player-card" style="border-left: 3px solid var(--success); opacity: 0.6;">
+              <div class="player-info">
+                <div class="player-name">${t.from} → ${t.to}</div>
+                <div class="player-stats" style="color: var(--success); font-size: 11px;">✓ Paid on ${new Date(t.settledDate).toLocaleDateString()}</div>
+              </div>
+              <div class="player-winnings" style="color: var(--success); font-weight: 700;">${formatCurrency(t.amount)}</div>
+            </div>
+          `).join('')}
+        `;
+      }
+      
+      // If everything is settled
+      if (html === '') {
+        html = '<div class="empty-state"><div class="empty-icon">✅</div><div style="font-size: 18px; color: var(--text-secondary);">All settled up!</div></div>';
+      }
+      
+      document.getElementById('settlementList').innerHTML = html;
+    }
+
+    function calculateTransactions(balances) {
+      const owes = [];
+      const owed = [];
+      
+      Object.keys(balances).forEach(player => {
+        const balance = Math.round(balances[player] * 100) / 100;
+        if (balance < -0.01) {
+          owes.push({ name: player, totalWinnings: balance });
+        } else if (balance > 0.01) {
+          owed.push({ name: player, totalWinnings: balance });
+        }
+      });
+      
+      let transactions = [];
+      let owesClone = owes.map(p => ({ ...p }));
+      let owedClone = owed.map(p => ({ ...p }));
+      
+      for (let debtor of owesClone) {
+        let debt = Math.abs(debtor.totalWinnings);
+        
+        for (let creditor of owedClone) {
+          if (debt <= 0) break;
+          if (creditor.totalWinnings <= 0) continue;
+          
+          const amount = Math.min(debt, creditor.totalWinnings);
+          transactions.push({
+            from: debtor.name,
+            to: creditor.name,
+            amount: amount
+          });
+          
+          debt -= amount;
+          creditor.totalWinnings -= amount;
+        }
+      }
+      
+      return transactions;
+    }
+
+    async function markTransactionSettled(from, to, amount) {
+      if (!confirm(`Mark this payment as settled?\n\n${from} paid ${to} ${formatCurrency(amount)}`)) {
+        return;
+      }
+      
+      // Initialize settled transactions array if it doesn't exist
+      if (!groupData.settledTransactions) {
+        groupData.settledTransactions = [];
+      }
+      
+      // Add this specific transaction to settled list
+      groupData.settledTransactions.push({
+        from: from,
+        to: to,
+        amount: amount,
+        settledDate: new Date().toISOString()
+      });
+      
+      await saveGroupData();
+      showToast(`Payment marked as settled! 🎉`);
+      loadSettlement();
+    }
+
+    async function markAllSettled() {
+      const period = document.getElementById('settlementPeriodSelect').value;
+      const currentYear = new Date().getFullYear();
+      
+      // Find which nights to mark
+      let nightsToSettle = [];
+      
+      if (period === 'ytd') {
+        nightsToSettle = groupData.nights.filter(n => {
+          const [year] = n.date.split('-');
+          return parseInt(year) === currentYear && !n.settled;
+        });
+      } else if (period === 'unsettled') {
+        nightsToSettle = groupData.nights.filter(n => !n.settled);
+      } else {
+        // lifetime - all nights
+        nightsToSettle = groupData.nights.filter(n => !n.settled);
+      }
+      
+      if (nightsToSettle.length === 0) {
+        showToast('Already settled!', false);
+        return;
+      }
+      
+      if (!confirm(`Mark all ${nightsToSettle.length} night${nightsToSettle.length !== 1 ? 's' : ''} as settled?\n\nThis will mark ALL transactions as paid.`)) {
+        return;
+      }
+      
+      nightsToSettle.forEach(night => {
+        night.settled = true;
+      });
+      
+      await saveGroupData();
+      showToast(`${nightsToSettle.length} night${nightsToSettle.length !== 1 ? 's' : ''} marked as settled! 🎉`);
+      loadSettlement();
+    }
+
+    // Helper functions
+    function calculatePlayerStats(yearFilter = null) {
+      const nights = groupData.nights || [];
+      const players = groupData.players || [];
+      const currentYear = groupData.currentYear || new Date().getFullYear();
+      
+      const stats = {};
+      players.forEach(p => {
+        stats[p] = { totalWinnings: 0, gamesPlayed: 0, wins: 0 };
+      });
+      
+      // Apply year filter
+      const filteredNights = nights.filter(n => {
+        const [year] = n.date.split('-');
+        const nightYear = parseInt(year);
+        
+        if (yearFilter === null || yearFilter === 'ytd') {
+          return nightYear === currentYear;
+        } else if (yearFilter === 'lifetime') {
+          return true;
+        } else {
+          return nightYear === parseInt(yearFilter);
+        }
+      });
+      
+      filteredNights.forEach(night => {
+        night.results.forEach(r => {
+          if (!stats[r.player]) {
+            stats[r.player] = { totalWinnings: 0, gamesPlayed: 0, wins: 0 };
+          }
+          stats[r.player].totalWinnings += r.winnings;
+          stats[r.player].gamesPlayed++;
+          if (r.winnings > 0) stats[r.player].wins++;
+        });
+      });
+      
+      return Object.keys(stats).map(name => ({
+        name,
+        totalWinnings: stats[name].totalWinnings,
+        gamesPlayed: stats[name].gamesPlayed,
+        wins: stats[name].wins,
+        winRate: stats[name].gamesPlayed > 0 ? Math.round((stats[name].wins / stats[name].gamesPlayed) * 100) : 0
+      })).sort((a, b) => b.totalWinnings - a.totalWinnings);
+    }
+
+    function calculateAchievements() {
+      const nights = groupData.nights || [];
+      const achievements = [];
+      
+      // Big Winner - win $100+ in a single night
+      nights.forEach(night => {
+        night.results.forEach(r => {
+          if (r.winnings >= 100) {
+            achievements.push({
+              icon: '💰',
+              name: 'Big Winner',
+              description: `${r.player} won ${formatCurrency(r.winnings)} in a single night`,
+              date: formatDate(night.date)
+            });
+          }
+        });
+      });
+      
+      // Comeback Kid - win after being down
+      // This would require tracking during the night, so simplified version
+      
+      // Hot Streak - 3+ wins in a row
+      const playerStats = calculatePlayerStats();
+      playerStats.forEach(p => {
+        if (p.wins >= 3) {
+          achievements.push({
+            icon: '🔥',
+            name: 'Hot Streak',
+            description: `${p.name} won ${p.wins} games`,
+            date: 'Season'
+          });
+        }
+      });
+      
+      return achievements;
+    }
+
+    function formatCurrency(amount) {
+      const currency = groupData.settings?.currency || '$';
+      return currency + Math.abs(amount).toFixed(2);
+    }
+
+    function formatDate(dateStr) {
+      // Parse date as local time to avoid timezone issues
+      const [year, month, day] = dateStr.split('-');
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // Modal functions
+    function openAddNightModal() {
+      console.log('Opening Add Night Modal');
+      
+      if (!groupData) {
+        console.error('Group data not loaded');
+        showToast('Error: Group data not loaded', true);
+        return;
+      }
+      
+      // Reset edit state
+      document.getElementById('addNightModal').dataset.editIndex = '';
+      document.querySelector('#addNightModal .modal-title').textContent = 'Add Poker Night';
+      document.querySelector('#addNightModal .btn-primary').textContent = 'Save Night';
+      
+      document.getElementById('nightDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('nightBuyIn').value = groupData.settings?.defaultBuyIn || 20;
+      document.getElementById('nightPlayersContainer').innerHTML = '';
+      document.getElementById('nightExpensesContainer').innerHTML = '';
+      document.getElementById('nightLocation').value = '';
+      document.getElementById('nightNotes').value = '';
+      
+      // Add player result fields only if there are players
+      if (groupData.players && groupData.players.length > 0) {
+        groupData.players.forEach(player => {
+          addPlayerResult(player);
+        });
+      } else {
+        // Show message that players can be added later
+        document.getElementById('nightPlayersContainer').innerHTML = `
+          <div style="padding: 15px; background: rgba(99, 102, 241, 0.1); border: 1px solid var(--accent-purple); border-radius: 10px; text-align: center; color: var(--text-secondary); font-size: 13px;">
+            No players yet. You can add players later and edit this night.
+          </div>
+        `;
+      }
+      
+      document.getElementById('addNightModal').classList.add('active');
+      
+      // Update balance check after modal opens
+      setTimeout(updateBalanceCheck, 100);
+    }
+
+    function addPlayerResult(playerName = '', totalBuyIn = '', cashOut = '') {
+      const container = document.getElementById('nightPlayersContainer');
+      const players = groupData.players || [];
+      const defaultBuyIn = parseFloat(document.getElementById('nightBuyIn').value) || 20;
+      
+      const div = document.createElement('div');
+      div.className = 'player-result';
+      div.innerHTML = `
+        <select class="form-select" style="flex: 2;" onchange="updateBalanceCheck()">
+          <option value="">Select Player</option>
+          ${players.map(p => `<option value="${p}" ${p === playerName ? 'selected' : ''}>${p}</option>`).join('')}
+        </select>
+        <input type="number" class="form-input" placeholder="Buy-in" step="0.01" style="flex: 1;" value="${totalBuyIn || defaultBuyIn}" title="Total amount invested (including rebuys)" oninput="updateBalanceCheck()">
+        <input type="number" class="form-input" placeholder="Cash Out" step="0.01" style="flex: 1;" value="${cashOut}" title="Amount cashed out at end" oninput="updateBalanceCheck()">
+        <button class="remove-player-btn" onclick="this.parentElement.remove(); updateBalanceCheck();">×</button>
+      `;
+      container.appendChild(div);
+      
+      // Update balance after adding
+      setTimeout(updateBalanceCheck, 50);
+    }
+
+    function updateBalanceCheck() {
+      console.log('updateBalanceCheck called');
+      
+      const resultDivs = document.querySelectorAll('#nightPlayersContainer .player-result');
+      console.log('Found player result divs:', resultDivs.length);
+      
+      let totalBuyIn = 0;
+      let totalCashOut = 0;
+      
+      resultDivs.forEach(div => {
+        const player = div.querySelector('select').value;
+        const inputs = div.querySelectorAll('input');
+        const buyIn = parseFloat(inputs[0].value) || 0;
+        const cashOut = parseFloat(inputs[1].value) || 0;
+        
+        console.log('Player:', player, 'Buy-in:', buyIn, 'Cash out:', cashOut);
+        
+        totalBuyIn += buyIn;
+        totalCashOut += cashOut;
+      });
+      
+      const balanceCheck = document.getElementById('balanceCheck');
+      const balanceAmount = document.getElementById('balanceAmount');
+      
+      console.log('Total buy-in:', totalBuyIn, 'Total cash out:', totalCashOut);
+      
+      if (resultDivs.length === 0) {
+        balanceCheck.style.display = 'none';
+        return;
+      }
+      
+      const difference = totalCashOut - totalBuyIn;
+      const isBalanced = Math.abs(difference) < 0.01;
+      const currency = groupData.settings?.currency || '$';
+      
+      balanceCheck.style.display = 'block';
+      
+      if (isBalanced) {
+        // Green - balanced
+        balanceCheck.style.background = 'rgba(16, 185, 129, 0.2)';
+        balanceCheck.style.border = '2px solid var(--success)';
+        balanceCheck.style.color = 'var(--success)';
+        balanceAmount.innerHTML = `✅ Balanced! Buy-in: ${currency}${totalBuyIn.toFixed(2)} = Cash Out: ${currency}${totalCashOut.toFixed(2)}`;
+      } else {
+        // Red - not balanced
+        balanceCheck.style.background = 'rgba(239, 68, 68, 0.2)';
+        balanceCheck.style.border = '2px solid var(--error)';
+        balanceCheck.style.color = 'var(--error)';
+        const diffText = difference > 0 ? `+${currency}${Math.abs(difference).toFixed(2)}` : `-${currency}${Math.abs(difference).toFixed(2)}`;
+        balanceAmount.innerHTML = `⚠️ Off by ${diffText}<br><small style="font-size: 12px; opacity: 0.8;">Buy-in: ${currency}${totalBuyIn.toFixed(2)} • Cash Out: ${currency}${totalCashOut.toFixed(2)}</small>`;
+      }
+    }
+
+    function addExpense(expenseData = null) {
+      const container = document.getElementById('nightExpensesContainer');
+      const players = groupData.players || [];
+      
+      const div = document.createElement('div');
+      div.className = 'player-result';
+      div.innerHTML = `
+        <select class="form-select" style="flex: 2;">
+          <option value="">Who Paid?</option>
+          ${players.map(p => `<option value="${p}" ${expenseData && p === expenseData.paidBy ? 'selected' : ''}>${p}</option>`).join('')}
+        </select>
+        <input type="number" class="form-input" placeholder="Amount" step="0.01" style="flex: 1;" value="${expenseData ? expenseData.amount : ''}">
+        <input type="text" class="form-input" placeholder="What for?" style="flex: 1.5;" value="${expenseData ? expenseData.description : ''}">
+        <button class="remove-player-btn" onclick="this.parentElement.remove()">×</button>
+      `;
+      container.appendChild(div);
+    }
+
+    async function saveNight() {
+      const date = document.getElementById('nightDate').value;
+      const location = document.getElementById('nightLocation').value;
+      const buyIn = parseFloat(document.getElementById('nightBuyIn').value);
+      const notes = document.getElementById('nightNotes').value;
+      
+      if (!date) {
+        showToast('Please enter a date', true);
+        return;
+      }
+      
+      const playerResults = [];
+      const resultDivs = document.querySelectorAll('#nightPlayersContainer .player-result');
+      resultDivs.forEach(div => {
+        const player = div.querySelector('select').value;
+        const inputs = div.querySelectorAll('input');
+        const totalBuyIn = parseFloat(inputs[0].value) || 0;
+        const cashOut = parseFloat(inputs[1].value) || 0;
+        if (player) {
+          // Calculate winnings = cash out - total buy in
+          const winnings = cashOut - totalBuyIn;
+          playerResults.push({ player, winnings, cashOut, totalBuyIn });
+        }
+      });
+      
+      const expenses = [];
+      const expenseDivs = document.querySelectorAll('#nightExpensesContainer .player-result');
+      expenseDivs.forEach(div => {
+        const inputs = div.querySelectorAll('input');
+        const paidBy = div.querySelector('select').value;
+        const amount = parseFloat(inputs[0].value) || 0;
+        const description = inputs[1].value.trim();
+        if (paidBy && amount > 0) {
+          expenses.push({ paidBy, amount, description });
+        }
+      });
+      
+      const night = {
+        date,
+        location,
+        buyIn,
+        notes,
+        results: playerResults,
+        expenses: expenses,
+        settlement: null // Will be calculated when user clicks settle button
+      };
+      
+      // Check if editing existing night
+      const editIndex = document.getElementById('addNightModal').dataset.editIndex;
+      if (editIndex !== undefined && editIndex !== '') {
+        groupData.nights[parseInt(editIndex)] = night;
+        showToast('Poker night updated!');
+      } else {
+        groupData.nights.push(night);
+        showToast('Poker night added!');
+      }
+      
+      await saveGroupData();
+      closeModal('addNightModal');
+      
+      // Immediately update UI
+      loadNights();
+      switchTab('nights');
+    }
+
+    function calculateSettlement() {
+      // Get current night data from modal
+      const playerResults = [];
+      const resultDivs = document.querySelectorAll('#nightPlayersContainer .player-result');
+      resultDivs.forEach(div => {
+        const player = div.querySelector('select').value;
+        const inputs = div.querySelectorAll('input');
+        const totalBuyIn = parseFloat(inputs[0].value) || 0;
+        const cashOut = parseFloat(inputs[1].value) || 0;
+        if (player) {
+          // Calculate winnings = cash out - total buy in
+          const winnings = cashOut - totalBuyIn;
+          playerResults.push({ player, winnings, cashOut, totalBuyIn });
+        }
+      });
+      
+      const expenses = [];
+      const expenseDivs = document.querySelectorAll('#nightExpensesContainer .player-result');
+      expenseDivs.forEach(div => {
+        const inputs = div.querySelectorAll('input');
+        const paidBy = div.querySelector('select').value;
+        const amount = parseFloat(inputs[0].value) || 0;
+        const description = inputs[1].value.trim();
+        if (paidBy && amount > 0) {
+          expenses.push({ paidBy, amount, description });
+        }
+      });
+      
+      if (playerResults.length === 0) {
+        showToast('Add players first!', true);
+        return;
+      }
+      
+      const currency = groupData.settings?.currency || '$';
+      
+      // Calculate POKER-ONLY settlements (winnings - buy-in)
+      // Each player paid buy-in, then cashed out with winnings
+      // Net effect: winnings - buy-in = what they take home
+      const pokerBalances = {};
+      playerResults.forEach(r => {
+        // If someone won $50 and paid $20 buy-in, they net $30
+        // If someone lost $10 (negative winnings) and paid $20 buy-in, they net -$30
+        pokerBalances[r.player] = r.winnings;
+      });
+      
+      const pokerTransactions = calculateTransactionsFromBalances(pokerBalances);
+      
+      // Calculate EXPENSE-ONLY settlements
+      let expenseTransactions = [];
+      let totalExpenses = 0;
+      
+      if (expenses.length > 0) {
+        totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+        const perPersonExpense = totalExpenses / playerResults.length;
+        
+        const expenseBalances = {};
+        playerResults.forEach(r => {
+          expenseBalances[r.player] = 0;
+        });
+        
+        // Person who paid gets reimbursed
+        expenses.forEach(expense => {
+          expenseBalances[expense.paidBy] = (expenseBalances[expense.paidBy] || 0) + expense.amount;
+        });
+        
+        // Everyone pays their share
+        playerResults.forEach(r => {
+          expenseBalances[r.player] -= perPersonExpense;
+        });
+        
+        expenseTransactions = calculateTransactionsFromBalances(expenseBalances);
+      }
+      
+      // Calculate OPTIMIZED (combined) settlement
+      // This is the REAL settlement: poker winnings + expenses
+      const combinedBalances = {};
+      
+      playerResults.forEach(r => {
+        // Start with poker winnings (already accounts for buy-in since winnings = cash_out - buy_in)
+        combinedBalances[r.player] = r.winnings;
+      });
+      
+      // Add expense adjustments
+      if (expenses.length > 0) {
+        const perPersonExpense = totalExpenses / playerResults.length;
+        
+        // Person who paid for expenses gets reimbursed
+        expenses.forEach(expense => {
+          combinedBalances[expense.paidBy] = (combinedBalances[expense.paidBy] || 0) + expense.amount;
+        });
+        
+        // Everyone pays their share of expenses
+        playerResults.forEach(r => {
+          combinedBalances[r.player] = (combinedBalances[r.player] || 0) - perPersonExpense;
+        });
+      }
+      
+      const allTransactions = [
+        ...pokerTransactions.map(t => ({from: t.from, to: t.to, amount: t.amount})),
+        ...expenseTransactions.map(t => ({from: t.from, to: t.to, amount: t.amount}))
+      ];
+      
+      const optimizedTransactions = optimizeSettlement(allTransactions);
+      
+      // Calculate total pot from player buy-ins
+      const totalPot = playerResults.reduce((sum, r) => sum + r.totalBuyIn, 0);
+      
+      // Create beautiful 3-column modal
+      showSettlementModal(pokerTransactions, expenseTransactions, optimizedTransactions, totalExpenses, totalPot, currency);
+    }
+
+    function calculateTransactionsFromBalances(balances) {
+      const owes = [];
+      const owed = [];
+      
+      Object.keys(balances).forEach(player => {
+        const balance = Math.round(balances[player] * 100) / 100;
+        if (balance < -0.01) {
+          owes.push({ player, amount: -balance });
+        } else if (balance > 0.01) {
+          owed.push({ player, amount: balance });
+        }
+      });
+      
+      const transactions = [];
+      owes.sort((a, b) => b.amount - a.amount);
+      owed.sort((a, b) => b.amount - a.amount);
+      
+      let i = 0, j = 0;
+      const owesCopy = owes.map(d => ({player: d.player, amount: d.amount}));
+      const owedCopy = owed.map(c => ({player: c.player, amount: c.amount}));
+      
+      while (i < owesCopy.length && j < owedCopy.length) {
+        const debtor = owesCopy[i];
+        const creditor = owedCopy[j];
+        const amount = Math.min(debtor.amount, creditor.amount);
+        
+        if (amount > 0.01) {
+          transactions.push({
+            from: debtor.player,
+            to: creditor.player,
+            amount: Math.round(amount * 100) / 100
+          });
+        }
+        
+        debtor.amount -= amount;
+        creditor.amount -= amount;
+        
+        if (debtor.amount < 0.01) i++;
+        if (creditor.amount < 0.01) j++;
+      }
+      
+      return transactions;
+    }
+
+    function optimizeSettlement(transactions) {
+      // STEP 1: Net out opposite-direction transactions
+      const debts = {};
+      
+      transactions.forEach(t => {
+        const key = t.from + '||' + t.to;
+        const reverseKey = t.to + '||' + t.from;
+        
+        if (debts[reverseKey]) {
+          const existing = debts[reverseKey];
+          if (existing > t.amount) {
+            debts[reverseKey] = existing - t.amount;
+          } else if (existing < t.amount) {
+            delete debts[reverseKey];
+            debts[key] = t.amount - existing;
+          } else {
+            delete debts[reverseKey];
+          }
+        } else {
+          debts[key] = (debts[key] || 0) + t.amount;
+        }
+      });
+      
+      // STEP 2: Calculate net balance for each person
+      const netBalance = {};
+      
+      Object.keys(debts).forEach(key => {
+        const parts = key.split('||');
+        const from = parts[0];
+        const to = parts[1];
+        const amount = debts[key];
+        
+        if (!netBalance[from]) netBalance[from] = 0;
+        if (!netBalance[to]) netBalance[to] = 0;
+        
+        netBalance[from] -= amount;
+        netBalance[to] += amount;
+      });
+      
+      // STEP 3: Separate into debtors and creditors
+      const debtors = [];
+      const creditors = [];
+      
+      Object.keys(netBalance).forEach(person => {
+        const balance = Math.round(netBalance[person] * 100) / 100;
+        if (balance < -0.01) {
+          debtors.push({ person: person, amount: -balance });
+        } else if (balance > 0.01) {
+          creditors.push({ person: person, amount: balance });
+        }
+      });
+      
+      // STEP 4: Sort for optimal greedy matching
+      debtors.sort((a, b) => b.amount - a.amount);
+      creditors.sort((a, b) => b.amount - a.amount);
+      
+      // STEP 5: Greedy algorithm to match debtors with creditors
+      const optimized = [];
+      let i = 0, j = 0;
+      
+      const debtorsCopy = debtors.map(d => ({person: d.person, amount: d.amount}));
+      const creditorsCopy = creditors.map(c => ({person: c.person, amount: c.amount}));
+      
+      while (i < debtorsCopy.length && j < creditorsCopy.length) {
+        const debtor = debtorsCopy[i];
+        const creditor = creditorsCopy[j];
+        const amount = Math.min(debtor.amount, creditor.amount);
+        
+        if (amount > 0.01) {
+          optimized.push({
+            from: debtor.person,
+            to: creditor.person,
+            amount: Math.round(amount * 100) / 100
+          });
+        }
+        
+        debtor.amount -= amount;
+        creditor.amount -= amount;
+        
+        if (debtor.amount < 0.01) i++;
+        if (creditor.amount < 0.01) j++;
+      }
+      
+      return optimized;
+    }
+
+    function showSettlementModal(pokerTrans, expenseTrans, optimizedTrans, totalExpenses, totalPot, currency) {
+      const formatTransaction = (t, color) => `
+        <div style="padding: 12px; background: rgba(255,255,255,0.05); border-left: 3px solid ${color}; border-radius: 8px; margin-bottom: 8px;">
+          <div style="font-weight: 600; font-size: 14px;">${t.from} →</div>
+          <div style="font-size: 13px; color: var(--text-secondary);">${t.to}</div>
+          <div style="font-size: 18px; font-weight: 700; color: ${color}; margin-top: 4px;">${currency}${t.amount.toFixed(2)}</div>
+        </div>
+      `;
+      
+      const pokerHTML = pokerTrans.length > 0 
+        ? pokerTrans.map(t => formatTransaction(t, '#f39c12')).join('') 
+        : '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">All settled!</div>';
+      
+      const expenseHTML = expenseTrans.length > 0
+        ? `<div style="font-size: 14px; color: #2ecc71; margin-bottom: 10px; font-weight: 600;">Total: ${currency}${totalExpenses.toFixed(2)}</div>` + 
+          expenseTrans.map(t => formatTransaction(t, '#2ecc71')).join('')
+        : '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">No expenses</div>';
+      
+      const optimizedHTML = optimizedTrans.length > 0
+        ? `<div style="font-size: 14px; color: #9b59b6; margin-bottom: 10px; font-weight: 600;">✨ Reduced to ${optimizedTrans.length} payment${optimizedTrans.length !== 1 ? 's' : ''}</div>` +
+          optimizedTrans.map(t => formatTransaction(t, '#9b59b6')).join('') +
+          '<div style="margin-top: 10px; text-align: center; font-size: 12px; color: #9b59b6; font-weight: 600;">✨ Use these simplified payments</div>'
+        : '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">All settled!</div>';
+      
+      const modalHTML = `
+        <div class="modal active" id="settlementModal" onclick="if(event.target.id==='settlementModal') closeModal('settlementModal')">
+          <div class="modal-content" style="max-width: 900px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <div class="modal-title">💰 Settlement Calculator</div>
+              <button class="modal-close" onclick="closeModal('settlementModal')">×</button>
+            </div>
+            
+            <div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 20px; text-align: center; font-size: 14px;">
+              <strong>Total Pot:</strong> ${currency}${totalPot.toFixed(2)}
+              ${totalExpenses > 0 ? `<span style="margin-left: 20px;"><strong>Expenses:</strong> ${currency}${totalExpenses.toFixed(2)} total</span>` : ''}
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
+              <div>
+                <div style="text-align: center; font-size: 16px; font-weight: 700; color: #f39c12; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #f39c12;">
+                  🃏 Poker
+                </div>
+                ${pokerHTML}
+              </div>
+              
+              <div>
+                <div style="text-align: center; font-size: 16px; font-weight: 700; color: #2ecc71; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #2ecc71;">
+                  💰 Expenses
+                </div>
+                ${expenseHTML}
+              </div>
+              
+              <div style="border: 2px solid #9b59b6; border-radius: 12px; padding: 15px;">
+                <div style="text-align: center; font-size: 16px; font-weight: 700; color: #9b59b6; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #9b59b6;">
+                  📊 Optimized
+                </div>
+                ${optimizedHTML}
+              </div>
+            </div>
+            
+            <div style="padding: 15px; background: rgba(99, 102, 241, 0.1); border: 1px solid var(--accent-purple); border-radius: 12px; font-size: 13px; line-height: 1.6;">
+              <strong>💡 How it works:</strong><br>
+              <strong>Poker column:</strong> Settlements based on each player's total buy-in (including rebuys) vs their cash out. Total pot: ${currency}${totalPot.toFixed(2)}.<br>
+              <strong>Expenses column:</strong> Shows who owes whom for shared costs (food, drinks, etc.) split evenly among all players.<br>
+              <strong>Optimized column:</strong> Combines poker + expenses and minimizes transactions. For example, if Alice owes Bob ${currency}20 and Bob owes Charlie ${currency}20, it simplifies to: Alice pays Charlie ${currency}20 directly.
+            </div>
+            
+            <button class="btn btn-primary" onclick="closeModal('settlementModal')" style="width: 100%; margin-top: 15px;">Close</button>
+          </div>
+        </div>
+      `;
+      
+      // Remove existing settlement modal if any
+      const existing = document.getElementById('settlementModal');
+      if (existing) existing.remove();
+      
+      // Add new modal to body
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    function editNight(index) {
+      const night = groupData.nights[index];
+      
+      // Store the index we're editing
+      document.getElementById('addNightModal').dataset.editIndex = index;
+      
+      // Populate form
+      document.getElementById('nightDate').value = night.date;
+      document.getElementById('nightBuyIn').value = night.buyIn;
+      document.getElementById('nightLocation').value = night.location || '';
+      document.getElementById('nightNotes').value = night.notes || '';
+      
+      // Populate players
+      const container = document.getElementById('nightPlayersContainer');
+      container.innerHTML = '';
+      
+      const players = groupData.players || [];
+      
+      // Add existing results
+      if (night.results && night.results.length > 0) {
+        night.results.forEach(result => {
+          // Use saved totalBuyIn if available, otherwise use night's buyIn
+          const totalBuyIn = result.totalBuyIn !== undefined ? result.totalBuyIn : night.buyIn;
+          // Use cashOut if available, otherwise calculate from winnings + totalBuyIn
+          const cashOut = result.cashOut !== undefined ? result.cashOut : result.winnings + totalBuyIn;
+          
+          const div = document.createElement('div');
+          div.className = 'player-result';
+          div.innerHTML = `
+            <select class="form-select" style="flex: 2;" onchange="updateBalanceCheck()">
+              <option value="">Select Player</option>
+              ${players.map(p => `<option value="${p}" ${p === result.player ? 'selected' : ''}>${p}</option>`).join('')}
+            </select>
+            <input type="number" class="form-input" placeholder="Buy-in" step="0.01" style="flex: 1;" value="${totalBuyIn}" title="Total amount invested" oninput="updateBalanceCheck()">
+            <input type="number" class="form-input" placeholder="Cash Out" step="0.01" style="flex: 1;" value="${cashOut}" title="Amount cashed out" oninput="updateBalanceCheck()">
+            <button class="remove-player-btn" onclick="this.parentElement.remove(); updateBalanceCheck();">×</button>
+          `;
+          container.appendChild(div);
+        });
+      }
+      
+      // Add empty slots for players not yet added
+      if (players.length > 0) {
+        players.forEach(player => {
+          // Only add if not already in results
+          const alreadyAdded = night.results && night.results.some(r => r.player === player);
+          if (!alreadyAdded) {
+            addPlayerResult(player);
+          }
+        });
+      }
+      
+      // Populate expenses
+      const expenseContainer = document.getElementById('nightExpensesContainer');
+      expenseContainer.innerHTML = '';
+      
+      if (night.expenses && night.expenses.length > 0) {
+        night.expenses.forEach(expense => {
+          addExpense(expense);
+        });
+      }
+      
+      // Change modal title
+      document.querySelector('#addNightModal .modal-title').textContent = 'Edit Poker Night';
+      document.querySelector('#addNightModal .btn-primary').textContent = 'Update Night';
+      
+      document.getElementById('addNightModal').classList.add('active');
+      
+      // Update balance check after modal opens with data
+      setTimeout(updateBalanceCheck, 100);
+    }
+
+    function openAddPlayerModal() {
+      document.getElementById('playerName').value = '';
+      document.getElementById('addPlayerModal').dataset.editIndex = '';
+      document.querySelector('#addPlayerModal .modal-title').textContent = 'Add Player';
+      document.querySelector('#addPlayerModal .btn-primary').textContent = 'Add Player';
+      document.getElementById('addPlayerModal').classList.add('active');
+    }
+
+    async function savePlayer() {
+      const name = document.getElementById('playerName').value.trim();
+      const editIndex = document.getElementById('addPlayerModal').dataset.editIndex;
+      
+      if (!name) {
+        showToast('Please enter a player name', true);
+        return;
+      }
+      
+      // Check if editing
+      if (editIndex !== undefined && editIndex !== '') {
+        const oldName = groupData.players[parseInt(editIndex)];
+        
+        // Check if name already exists (and it's not the same player)
+        if (groupData.players.includes(name) && name !== oldName) {
+          showToast('Player already exists', true);
+          return;
+        }
+        
+        // Initialize playerInfo if needed
+        if (!groupData.playerInfo) groupData.playerInfo = {};
+        
+        // Update player name everywhere
+        groupData.players[parseInt(editIndex)] = name;
+        
+        // Update playerInfo (preserve dateAdded)
+        if (groupData.playerInfo[oldName]) {
+          groupData.playerInfo[name] = groupData.playerInfo[oldName];
+          delete groupData.playerInfo[oldName];
+        }
+        
+        // Update name in all poker nights
+        groupData.nights.forEach(night => {
+          night.results.forEach(result => {
+            if (result.player === oldName) {
+              result.player = name;
+            }
+          });
+        });
+        
+        showToast('Player updated!');
+      } else {
+        // Adding new player
+        if (groupData.players.includes(name)) {
+          showToast('Player already exists', true);
+          return;
+        }
+        
+        // Initialize playerInfo if needed
+        if (!groupData.playerInfo) groupData.playerInfo = {};
+        
+        groupData.players.push(name);
+        
+        // Track when player was added
+        groupData.playerInfo[name] = {
+          dateAdded: new Date().toISOString()
+        };
+        
+        showToast('Player added!');
+      }
+      
+      await saveGroupData();
+      
+      closeModal('addPlayerModal');
+      
+      // Immediately update UI
+      loadPlayers();
+      switchTab('players');
+    }
+
+    function editPlayer(index) {
+      const playerName = groupData.players[index];
+      
+      document.getElementById('addPlayerModal').dataset.editIndex = index;
+      document.getElementById('playerName').value = playerName;
+      document.querySelector('#addPlayerModal .modal-title').textContent = 'Edit Player';
+      document.querySelector('#addPlayerModal .btn-primary').textContent = 'Update Player';
+      
+      document.getElementById('addPlayerModal').classList.add('active');
+    }
+
+    async function deletePlayer(index) {
+      if (!confirm('Delete this player? This will remove them from all games.')) return;
+      
+      const playerName = groupData.players[index];
+      groupData.players.splice(index, 1);
+      
+      // Remove from all nights
+      groupData.nights.forEach(night => {
+        night.results = night.results.filter(r => r.player !== playerName);
+      });
+      
+      await saveGroupData();
+      showToast('Player deleted');
+      loadPlayers();
+    }
+
+    async function deleteNight(index) {
+      if (!confirm('Delete this poker night?')) return;
+      
+      groupData.nights.splice(index, 1);
+      await saveGroupData();
+      showToast('Night deleted');
+      loadNights();
+    }
+
+    function openSettings() {
+      document.getElementById('settingsCurrency').value = groupData.settings?.currency || '$';
+      document.getElementById('settingsDefaultBuyIn').value = groupData.settings?.defaultBuyIn || 20;
+      document.getElementById('settingsModal').classList.add('active');
+    }
+
+    async function saveSettings() {
+      groupData.settings = {
+        currency: document.getElementById('settingsCurrency').value,
+        defaultBuyIn: parseFloat(document.getElementById('settingsDefaultBuyIn').value)
+      };
+      
+      await saveGroupData();
+      closeModal('settingsModal');
+      showToast('Settings saved!');
+    }
+
+    function exportData() {
+      const dataStr = JSON.stringify(groupData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `poker-data-${groupData.id}-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      showToast('Data exported!');
+    }
+
+    async function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (confirm('This will replace all current data. Continue?')) {
+            groupData = imported;
+            await saveGroupData();
+            showToast('Data imported!');
+            updateUI();
+          }
+        } catch (error) {
+          showToast('Invalid file format', true);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    async function saveGroupData() {
+      try {
+        console.log('Saving group data...', groupData);
+        const groupRef = window.firestore.doc(window.db, 'groups', groupId);
+        await window.firestore.updateDoc(groupRef, groupData);
+        console.log('Group data saved successfully!');
+      } catch (error) {
+        console.error('Error saving:', error);
+        showToast('Error saving data: ' + error.message, true);
+        throw error;
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function switchTab(tabName) {
+      console.log('Switching to tab:', tabName);
+      
+      // Update tab buttons - find the tab by matching text content
+      document.querySelectorAll('.tab').forEach(t => {
+        t.classList.remove('active');
+        if (t.textContent.toLowerCase().includes(tabName)) {
+          t.classList.add('active');
+        }
+      });
+      
+      // Update tab content
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      const tabContent = document.getElementById(tabName);
+      if (tabContent) {
+        tabContent.classList.add('active');
+      }
+      
+      // Load tab data
+      if (tabName === 'dashboard') updateDashboard();
+      else if (tabName === 'nights') loadNights();
+      else if (tabName === 'players') loadPlayers();
+      else if (tabName === 'leaderboard') loadLeaderboard();
+      else if (tabName === 'achievements') loadAchievements();
+      else if (tabName === 'stats') loadStats();
+      else if (tabName === 'settlement') loadSettlement();
+      else if (tabName === 'wrapped') loadWrapped();
+    }
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Initialize on load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
