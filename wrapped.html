@@ -387,7 +387,7 @@
       </div>
     </div>
     <div>
-      <div class="icon-btn" onclick="window.location.href='admin.html?group=' + groupId" title="Back to Admin">
+      <div class="icon-btn" onclick="goBack()" title="Back">
         ←
       </div>
     </div>
@@ -713,6 +713,13 @@
     function formatCurrency(amount) {
       const currency = groupData.settings?.currency || '$';
       return currency + Math.abs(amount).toFixed(2);
+    }
+
+    function goBack() {
+      // Check URL parameters for source page
+      const urlParams = new URLSearchParams(window.location.search);
+      const source = urlParams.get('source') || 'admin';
+      window.location.href = `${source}.html?group=${groupId}`;
     }
 
     function generateWrappedAchievements(player) {
