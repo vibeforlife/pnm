@@ -1708,16 +1708,41 @@
         return;
       }
       
-      // Calculate balances from nights
+      // Calculate balances from nights INCLUDING EXPENSES
       const balances = {};
+      
       nights.forEach(night => {
+        // Add poker winnings
         night.results.forEach(r => {
           balances[r.player] = (balances[r.player] || 0) + r.winnings;
         });
+        
+        // Add expense adjustments
+        if (night.expenses && night.expenses.length > 0) {
+          const totalExpenses = night.expenses.reduce((sum, e) => sum + e.amount, 0);
+          const numPlayers = night.results.length;
+          
+          if (numPlayers > 0) {
+            const perPersonExpense = totalExpenses / numPlayers;
+            
+            // Person who paid gets reimbursed
+            night.expenses.forEach(expense => {
+              balances[expense.paidBy] = (balances[expense.paidBy] || 0) + expense.amount;
+            });
+            
+            // Everyone pays their share
+            night.results.forEach(r => {
+              balances[r.player] = (balances[r.player] || 0) - perPersonExpense;
+            });
+          }
+        }
       });
       
-      // Generate all transactions needed
+      // Generate all transactions needed (now includes expenses!)
       let allTransactions = calculateTransactions(balances);
+      
+      // Optimize to minimize transactions
+      allTransactions = optimizeSettlement(allTransactions);
       
       // Filter out individually settled transactions
       const settledTransactionsList = groupData.settledTransactions || [];
