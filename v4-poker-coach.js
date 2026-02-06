@@ -14,6 +14,33 @@
   'use strict';
 
   // ============================================================================
+  // PHOTO UTILITIES
+  // ============================================================================
+
+  async function compressImage(base64, maxWidth = 1024) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.8));
+      };
+      img.src = base64;
+    });
+  }
+
+  // ============================================================================
   // AI ANALYSIS FUNCTIONS
   // ============================================================================
 
@@ -53,29 +80,30 @@
 
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const base64Image = e.target.result;
-      
-      // Show preview
-      document.getElementById('aiPhotoPreview').innerHTML = `
-        <img src="${base64Image}" 
-             style="width:100%; max-width:400px; border-radius:8px; border:1px solid var(--glass-border);">
-      `;
-
-      // Show analyzing state
-      document.getElementById('aiAnalysisResult').innerHTML = `
-        <div style="text-align:center; padding:30px;">
-          <div style="font-size:48px; margin-bottom:15px;">🤔</div>
-          <div style="font-size:16px; font-weight:600; color:var(--text-primary); margin-bottom:8px;">
-            Analyzing your poker situation...
-          </div>
-          <div style="font-size:13px; color:var(--text-secondary);">
-            This may take a few seconds
-          </div>
-        </div>
-      `;
-
       try {
-        await analyzePokerSituation(base64Image);
+        // Compress image before processing
+        const compressedImage = await compressImage(e.target.result);
+        
+        // Show preview
+        document.getElementById('aiPhotoPreview').innerHTML = `
+          <img src="${compressedImage}" 
+               style="width:100%; max-width:400px; border-radius:8px; border:1px solid var(--glass-border);">
+        `;
+
+        // Show analyzing state
+        document.getElementById('aiAnalysisResult').innerHTML = `
+          <div style="text-align:center; padding:30px;">
+            <div style="font-size:48px; margin-bottom:15px;">🤔</div>
+            <div style="font-size:16px; font-weight:600; color:var(--text-primary); margin-bottom:8px;">
+              Analyzing your poker situation...
+            </div>
+            <div style="font-size:13px; color:var(--text-secondary);">
+              This may take a few seconds
+            </div>
+          </div>
+        `;
+
+        await analyzePokerSituation(compressedImage);
       } catch (error) {
         console.error('AI Analysis error:', error);
         document.getElementById('aiAnalysisResult').innerHTML = `
