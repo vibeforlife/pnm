@@ -17,7 +17,7 @@
   // PHOTO UTILITIES
   // ============================================================================
 
-  async function compressImage(base64, maxWidth = 1024) {
+  async function compressImage(base64, maxWidth = 800) {
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
@@ -34,7 +34,7 @@
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.8));
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
       };
       img.src = base64;
     });
@@ -734,11 +734,10 @@ ${analysis}
             <input type="file" 
                    id="aiPhotoInput" 
                    accept="image/*"
-                   capture="environment"
                    class="form-input"
                    onchange="handleAIPhotoUpload(event)">
             <div style="font-size:11px; color:var(--text-secondary); margin-top:6px;">
-              📸 Take a clear photo showing your hole cards and community cards
+              📸 Take a photo or upload from gallery
             </div>
           </div>
 
