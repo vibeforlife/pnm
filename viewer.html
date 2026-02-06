@@ -1041,10 +1041,10 @@
       <div class="tab" onclick="switchTab('nights')">🎲 Poker Nights</div>
       <div class="tab" onclick="switchTab('players')">👥 Players</div>
       <div class="tab" onclick="switchTab('leaderboard')">🏆 Leaderboard</div>
-      <div class="tab" onclick="window.location.href='achievements-enhanced.html?source=viewer&group=' + groupId">🎖️ Achievements</div>
+      <div class="tab" onclick="window.location.href='achievements-enhanced.html?source=viewer&group=' + window.groupId">🎖️ Achievements</div>
       <div class="tab" onclick="switchTab('stats')">📈 Stats</div>
       <div class="tab" onclick="switchTab('settlement')">💰 Settlement</div>
-      <div class="tab" onclick="window.location.href='wrapped.html?source=viewer&group=' + groupId">🎁 Wrapped</div>
+      <div class="tab" onclick="window.location.href='wrapped.html?source=viewer&group=' + window.groupId">🎁 Wrapped</div>
     </div>
 
     <!-- Dashboard Tab -->
@@ -1150,7 +1150,7 @@
         </div>
         
         <div class="chart-container">
-          <canvas id="leaderboardChart"></canvas>
+          <canvas id="window.leaderboardChart"></canvas>
         </div>
         <div id="leaderboardList" style="margin-top: 20px;"></div>
       </div>
@@ -1161,7 +1161,7 @@
       <div class="glass-card">
         <div class="card-header">
           <div class="card-title">Achievements</div>
-          <button class="btn btn-primary btn-small" onclick="window.location.href='achievements-enhanced.html?source=viewer&group=' + groupId">
+          <button class="btn btn-primary btn-small" onclick="window.location.href='achievements-enhanced.html?source=viewer&group=' + window.groupId">
             View All →
           </button>
         </div>
@@ -1208,7 +1208,7 @@
           <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 25px;">
             See detailed player stats, achievements, and fortune cookies!
           </div>
-          <button class="btn btn-primary" onclick="window.location.href='wrapped.html?source=viewer&group=' + groupId">
+          <button class="btn btn-primary" onclick="window.location.href='wrapped.html?source=viewer&group=' + window.groupId">
             Open Wrapped →
           </button>
         </div>
@@ -1318,7 +1318,7 @@
 
   <!-- Floating Action Button (Hand Rankings) -->
   <div class="fab" onclick="openModal('handRankingsModal')" title="Poker Hand Rankings">
-    🎴
+    <span style="font-size:20px;">♠</span><span style="font-size:24px;margin:0 -4px;">🃏</span><span style="font-size:20px;">♥</span>
   </div>
 
   <!-- Hand Rankings Modal -->
@@ -1338,7 +1338,7 @@
         <div class="hand-rank">1</div>
         <div class="hand-info">
           <div class="hand-name">Royal Flush</div>
-          <div class="hand-cards">A<span style="color:#06b6d4;">♠</span> K<span style="color:#06b6d4;">♠</span> Q<span style="color:#06b6d4;">♠</span> J<span style="color:#06b6d4;">♠</span> 10<span style="color:#06b6d4;">♠</span></div>
+          <div class="hand-cards">A<span style="color:#f8fafc;">♠</span> K<span style="color:#f8fafc;">♠</span> Q<span style="color:#f8fafc;">♠</span> J<span style="color:#f8fafc;">♠</span> 10<span style="color:#f8fafc;">♠</span></div>
           <div class="hand-desc">Ace, King, Queen, Jack, Ten of the same suit</div>
         </div>
       </div>
@@ -1358,7 +1358,7 @@
         <div class="hand-rank">3</div>
         <div class="hand-info">
           <div class="hand-name">Four of a Kind</div>
-          <div class="hand-cards">K<span style="color:#06b6d4;">♣</span> K<span style="color:#ef4444;">♦</span> K<span style="color:#ef4444;">♥</span> K<span style="color:#06b6d4;">♠</span> 3<span style="color:#06b6d4;">♣</span></div>
+          <div class="hand-cards">K<span style="color:#f8fafc;">♣</span> K<span style="color:#ef4444;">♦</span> K<span style="color:#ef4444;">♥</span> K<span style="color:#f8fafc;">♠</span> 3<span style="color:#f8fafc;">♣</span></div>
           <div class="hand-desc">Four cards of the same rank</div>
         </div>
       </div>
@@ -1368,7 +1368,7 @@
         <div class="hand-rank">4</div>
         <div class="hand-info">
           <div class="hand-name">Full House</div>
-          <div class="hand-cards">Q<span style="color:#06b6d4;">♠</span> Q<span style="color:#ef4444;">♥</span> Q<span style="color:#ef4444;">♦</span> 7<span style="color:#06b6d4;">♣</span> 7<span style="color:#06b6d4;">♠</span></div>
+          <div class="hand-cards">Q<span style="color:#f8fafc;">♠</span> Q<span style="color:#ef4444;">♥</span> Q<span style="color:#ef4444;">♦</span> 7<span style="color:#f8fafc;">♣</span> 7<span style="color:#f8fafc;">♠</span></div>
           <div class="hand-desc">Three of a kind plus a pair</div>
         </div>
       </div>
@@ -1388,7 +1388,7 @@
         <div class="hand-rank">6</div>
         <div class="hand-info">
           <div class="hand-name">Straight</div>
-          <div class="hand-cards">10<span style="color:#ef4444;">♥</span> 9<span style="color:#06b6d4;">♠</span> 8<span style="color:#06b6d4;">♣</span> 7<span style="color:#ef4444;">♦</span> 6<span style="color:#ef4444;">♥</span></div>
+          <div class="hand-cards">10<span style="color:#ef4444;">♥</span> 9<span style="color:#f8fafc;">♠</span> 8<span style="color:#f8fafc;">♣</span> 7<span style="color:#ef4444;">♦</span> 6<span style="color:#ef4444;">♥</span></div>
           <div class="hand-desc">Five cards in sequence, different suits</div>
         </div>
       </div>
@@ -1398,7 +1398,7 @@
         <div class="hand-rank">7</div>
         <div class="hand-info">
           <div class="hand-name">Three of a Kind</div>
-          <div class="hand-cards">7<span style="color:#06b6d4;">♠</span> 7<span style="color:#ef4444;">♦</span> 7<span style="color:#06b6d4;">♣</span> K<span style="color:#ef4444;">♥</span> 2<span style="color:#06b6d4;">♠</span></div>
+          <div class="hand-cards">7<span style="color:#f8fafc;">♠</span> 7<span style="color:#ef4444;">♦</span> 7<span style="color:#f8fafc;">♣</span> K<span style="color:#ef4444;">♥</span> 2<span style="color:#f8fafc;">♠</span></div>
           <div class="hand-desc">Three cards of the same rank</div>
         </div>
       </div>
@@ -1408,7 +1408,7 @@
         <div class="hand-rank">8</div>
         <div class="hand-info">
           <div class="hand-name">Two Pair</div>
-          <div class="hand-cards">J<span style="color:#ef4444;">♥</span> J<span style="color:#06b6d4;">♣</span> 4<span style="color:#06b6d4;">♠</span> 4<span style="color:#ef4444;">♦</span> 9<span style="color:#ef4444;">♥</span></div>
+          <div class="hand-cards">J<span style="color:#ef4444;">♥</span> J<span style="color:#f8fafc;">♣</span> 4<span style="color:#f8fafc;">♠</span> 4<span style="color:#ef4444;">♦</span> 9<span style="color:#ef4444;">♥</span></div>
           <div class="hand-desc">Two different pairs</div>
         </div>
       </div>
@@ -1418,7 +1418,7 @@
         <div class="hand-rank">9</div>
         <div class="hand-info">
           <div class="hand-name">One Pair</div>
-          <div class="hand-cards">10<span style="color:#ef4444;">♦</span> 10<span style="color:#06b6d4;">♠</span> K<span style="color:#06b6d4;">♣</span> 6<span style="color:#06b6d4;">♠</span> 3<span style="color:#ef4444;">♥</span></div>
+          <div class="hand-cards">10<span style="color:#ef4444;">♦</span> 10<span style="color:#f8fafc;">♠</span> K<span style="color:#f8fafc;">♣</span> 6<span style="color:#f8fafc;">♠</span> 3<span style="color:#ef4444;">♥</span></div>
           <div class="hand-desc">Two cards of the same rank</div>
         </div>
       </div>
@@ -1428,7 +1428,7 @@
         <div class="hand-rank">10</div>
         <div class="hand-info">
           <div class="hand-name">High Card</div>
-          <div class="hand-cards">A<span style="color:#ef4444;">♦</span> J<span style="color:#ef4444;">♥</span> 8<span style="color:#06b6d4;">♣</span> 5<span style="color:#06b6d4;">♠</span> 2<span style="color:#ef4444;">♦</span></div>
+          <div class="hand-cards">A<span style="color:#ef4444;">♦</span> J<span style="color:#ef4444;">♥</span> 8<span style="color:#f8fafc;">♣</span> 5<span style="color:#f8fafc;">♠</span> 2<span style="color:#ef4444;">♦</span></div>
           <div class="hand-desc">No matching cards - highest card wins</div>
         </div>
       </div>
@@ -1473,10 +1473,10 @@
   </script>
 
   <script>
-    // Global state
-    let groupData = null;
-    let groupId = null;
-    let leaderboardChart = null;
+    // Global state - V4 scripts need these on window
+    window.groupData = null;
+    window.groupId = null;
+    window.leaderboardChart = null;
 
     // Initialize
     async function init() {
@@ -1493,9 +1493,9 @@
       
       // Get group ID from URL
       const urlParams = new URLSearchParams(window.location.search);
-      groupId = urlParams.get('group');
+      window.groupId = urlParams.get('group');
 
-      if (!groupId) {
+      if (!window.groupId) {
         window.location.href = 'index.html';
         return;
       }
@@ -1504,10 +1504,10 @@
       await loadGroupData();
 
       // Set up real-time listener
-      const groupRef = window.firestore.doc(window.db, 'groups', groupId);
+      const groupRef = window.firestore.doc(window.db, 'groups', window.groupId);
       window.firestore.onSnapshot(groupRef, (doc) => {
         if (doc.exists()) {
-          groupData = doc.data();
+          window.groupData = doc.data();
           updateUI();
         }
       });
@@ -1515,7 +1515,7 @@
 
     async function loadGroupData() {
       try {
-        const groupRef = window.firestore.doc(window.db, 'groups', groupId);
+        const groupRef = window.firestore.doc(window.db, 'groups', window.groupId);
         const groupSnap = await window.firestore.getDoc(groupRef);
 
         if (!groupSnap.exists()) {
@@ -1524,14 +1524,14 @@
           return;
         }
 
-        groupData = groupSnap.data();
+        window.groupData = groupSnap.data();
         
         // Initialize default structure if needed
-        if (!groupData.players) groupData.players = [];
-        if (!groupData.nights) groupData.nights = [];
-        if (!groupData.archivedYears) groupData.archivedYears = {};
-        if (!groupData.currentYear) groupData.currentYear = new Date().getFullYear();
-        if (!groupData.settings) groupData.settings = { currency: '$', defaultBuyIn: 20 };
+        if (!window.groupData.players) window.groupData.players = [];
+        if (!window.groupData.nights) window.groupData.nights = [];
+        if (!window.groupData.archivedYears) window.groupData.archivedYears = {};
+        if (!window.groupData.currentYear) window.groupData.currentYear = new Date().getFullYear();
+        if (!window.groupData.settings) window.groupData.settings = { currency: '$', defaultBuyIn: 20 };
 
         updateUI();
       } catch (error) {
@@ -1541,11 +1541,11 @@
     }
 
     function updateUI() {
-      if (!groupData) return;
+      if (!window.groupData) return;
 
       // Update header
-      document.getElementById('headerGroupName').textContent = groupData.name;
-      document.getElementById('headerGroupCode').textContent = groupData.id;
+      document.getElementById('headerGroupName').textContent = window.groupData.name;
+      document.getElementById('headerGroupCode').textContent = window.groupData.id;
 
       // Show message banner if exists and not dismissed
       if (!checkDismissed()) {
@@ -1571,8 +1571,8 @@
     }
 
     function updateDashboard() {
-      const nights = groupData.nights || [];
-      const players = groupData.players || [];
+      const nights = window.groupData.nights || [];
+      const players = window.groupData.players || [];
       
       // Calculate stats
       document.getElementById('totalNights').textContent = nights.length;
@@ -1629,7 +1629,7 @@
     }
 
     function loadNights() {
-      let nights = (groupData.nights || []).slice();
+      let nights = (window.groupData.nights || []).slice();
       
       // Search filter
       const searchTerm = document.getElementById('nightsSearch')?.value.toLowerCase() || '';
@@ -1666,7 +1666,7 @@
       
       const nightsHTML = nights.length > 0 ? nights.map((night, index) => {
         // Find actual index in original array
-        const actualIndex = groupData.nights.findIndex(n => n.date === night.date && n.location === night.location);
+        const actualIndex = window.groupData.nights.findIndex(n => n.date === night.date && n.location === night.location);
         const winner = night.results.length > 0 ? night.results.reduce((max, r) => r.winnings > max.winnings ? r : max, night.results[0]) : null;
         
         return `
@@ -1740,9 +1740,9 @@
       document.getElementById('nightsList').innerHTML = nightsHTML;
     }
     function loadPlayers() {
-      const players = groupData.players || [];
+      const players = window.groupData.players || [];
       let playerStats = calculatePlayerStats();
-      const playerInfo = groupData.playerInfo || {};
+      const playerInfo = window.groupData.playerInfo || {};
       
       // Search filter
       const searchTerm = document.getElementById('playersSearch')?.value.toLowerCase() || '';
@@ -1807,7 +1807,7 @@
       // Populate year dropdown if needed
       const yearSelect = document.getElementById('leaderboardYearSelect');
       if (yearSelect && yearSelect.options.length === 2) {
-        const years = [...new Set(groupData.nights.map(n => {
+        const years = [...new Set(window.groupData.nights.map(n => {
           const [year] = n.date.split('-');
           return parseInt(year);
         }))].sort((a, b) => b - a);
@@ -1848,16 +1848,16 @@
     }
 
     function updateLeaderboardChart(playerStats) {
-      const ctx = document.getElementById('leaderboardChart');
+      const ctx = document.getElementById('window.leaderboardChart');
       if (!ctx) return;
 
-      if (leaderboardChart) {
-        leaderboardChart.destroy();
+      if (window.leaderboardChart) {
+        window.leaderboardChart.destroy();
       }
 
       const top10 = playerStats.slice(0, 10);
       
-      leaderboardChart = new Chart(ctx, {
+      window.leaderboardChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: top10.map(p => p.name),
@@ -1913,7 +1913,7 @@
 
     function loadStats() {
       const playerStats = calculatePlayerStats();
-      const nights = groupData.nights || [];
+      const nights = window.groupData.nights || [];
       
       const totalGames = nights.length;
       // Calculate total pot as actual buy-in amounts (chips on table)
@@ -1982,7 +1982,7 @@
       const currentYear = new Date().getFullYear();
       
       // Filter nights based on period
-      let nights = groupData.nights || [];
+      let nights = window.groupData.nights || [];
       
       if (period === 'ytd') {
         nights = nights.filter(n => {
@@ -2035,7 +2035,7 @@
       allTransactions = optimizeSettlement(allTransactions);
       
       // Filter out individually settled transactions
-      const settledTransactionsList = groupData.settledTransactions || [];
+      const settledTransactionsList = window.groupData.settledTransactions || [];
       const unsettledTransactions = allTransactions.filter(t => {
         return !settledTransactionsList.some(st => 
           st.from === t.from && st.to === t.to && Math.abs(st.amount - t.amount) < 0.01
@@ -2152,12 +2152,12 @@
       }
       
       // Initialize settled transactions array if it doesn't exist
-      if (!groupData.settledTransactions) {
-        groupData.settledTransactions = [];
+      if (!window.groupData.settledTransactions) {
+        window.groupData.settledTransactions = [];
       }
       
       // Add this specific transaction to settled list
-      groupData.settledTransactions.push({
+      window.groupData.settledTransactions.push({
         from: from,
         to: to,
         amount: amount,
@@ -2177,15 +2177,15 @@
       let nightsToSettle = [];
       
       if (period === 'ytd') {
-        nightsToSettle = groupData.nights.filter(n => {
+        nightsToSettle = window.groupData.nights.filter(n => {
           const [year] = n.date.split('-');
           return parseInt(year) === currentYear && !n.settled;
         });
       } else if (period === 'unsettled') {
-        nightsToSettle = groupData.nights.filter(n => !n.settled);
+        nightsToSettle = window.groupData.nights.filter(n => !n.settled);
       } else {
         // lifetime - all nights
-        nightsToSettle = groupData.nights.filter(n => !n.settled);
+        nightsToSettle = window.groupData.nights.filter(n => !n.settled);
       }
       
       if (nightsToSettle.length === 0) {
@@ -2208,9 +2208,9 @@
 
     // Helper functions
     function calculatePlayerStats(yearFilter = null) {
-      const nights = groupData.nights || [];
-      const players = groupData.players || [];
-      const currentYear = groupData.currentYear || new Date().getFullYear();
+      const nights = window.groupData.nights || [];
+      const players = window.groupData.players || [];
+      const currentYear = window.groupData.currentYear || new Date().getFullYear();
       
       const stats = {};
       players.forEach(p => {
@@ -2252,7 +2252,7 @@
     }
 
     function calculateAchievements() {
-      const nights = groupData.nights || [];
+      const nights = window.groupData.nights || [];
       const achievements = [];
       
       // Big Winner - win $100+ in a single night
@@ -2289,7 +2289,7 @@
     }
 
     function formatCurrency(amount) {
-      const currency = groupData.settings?.currency || '$';
+      const currency = window.groupData.settings?.currency || '$';
       return currency + Math.abs(amount).toFixed(2);
     }
 
@@ -2304,7 +2304,7 @@
     function openAddNightModal() {
       console.log('Opening Add Night Modal');
       
-      if (!groupData) {
+      if (!window.groupData) {
         console.error('Group data not loaded');
         showToast('Error: Group data not loaded', true);
         return;
@@ -2316,15 +2316,15 @@
       document.querySelector('#addNightModal .btn-primary').textContent = 'Save Night';
       
       document.getElementById('nightDate').value = new Date().toISOString().split('T')[0];
-      document.getElementById('nightBuyIn').value = groupData.settings?.defaultBuyIn || 20;
+      document.getElementById('nightBuyIn').value = window.groupData.settings?.defaultBuyIn || 20;
       document.getElementById('nightPlayersContainer').innerHTML = '';
       document.getElementById('nightExpensesContainer').innerHTML = '';
       document.getElementById('nightLocation').value = '';
       document.getElementById('nightNotes').value = '';
       
       // Add player result fields only if there are players
-      if (groupData.players && groupData.players.length > 0) {
-        groupData.players.forEach(player => {
+      if (window.groupData.players && window.groupData.players.length > 0) {
+        window.groupData.players.forEach(player => {
           addPlayerResult(player);
         });
       } else {
@@ -2344,7 +2344,7 @@
 
     function addPlayerResult(playerName = '', totalBuyIn = '', cashOut = '') {
       const container = document.getElementById('nightPlayersContainer');
-      const players = groupData.players || [];
+      const players = window.groupData.players || [];
       const defaultBuyIn = parseFloat(document.getElementById('nightBuyIn').value) || 20;
       
       const div = document.createElement('div');
@@ -2397,7 +2397,7 @@
       
       const difference = totalCashOut - totalBuyIn;
       const isBalanced = Math.abs(difference) < 0.01;
-      const currency = groupData.settings?.currency || '$';
+      const currency = window.groupData.settings?.currency || '$';
       
       balanceCheck.style.display = 'block';
       
@@ -2419,7 +2419,7 @@
 
     function addExpense(expenseData = null) {
       const container = document.getElementById('nightExpensesContainer');
-      const players = groupData.players || [];
+      const players = window.groupData.players || [];
       
       const div = document.createElement('div');
       div.className = 'player-result';
@@ -2485,10 +2485,10 @@
       // Check if editing existing night
       const editIndex = document.getElementById('addNightModal').dataset.editIndex;
       if (editIndex !== undefined && editIndex !== '') {
-        groupData.nights[parseInt(editIndex)] = night;
+        window.groupData.nights[parseInt(editIndex)] = night;
         showToast('Poker night updated!');
       } else {
-        groupData.nights.push(night);
+        window.groupData.nights.push(night);
         showToast('Poker night added!');
       }
       
@@ -2533,7 +2533,7 @@
         return;
       }
       
-      const currency = groupData.settings?.currency || '$';
+      const currency = window.groupData.settings?.currency || '$';
       
       // Calculate POKER-ONLY settlements (winnings - buy-in)
       // Each player paid buy-in, then cashed out with winnings
@@ -2822,7 +2822,7 @@
     }
 
     function editNight(index) {
-      const night = groupData.nights[index];
+      const night = window.groupData.nights[index];
       
       // Store the index we're editing
       document.getElementById('addNightModal').dataset.editIndex = index;
@@ -2837,7 +2837,7 @@
       const container = document.getElementById('nightPlayersContainer');
       container.innerHTML = '';
       
-      const players = groupData.players || [];
+      const players = window.groupData.players || [];
       
       // Add existing results
       if (night.results && night.results.length > 0) {
@@ -2912,28 +2912,28 @@
       
       // Check if editing
       if (editIndex !== undefined && editIndex !== '') {
-        const oldName = groupData.players[parseInt(editIndex)];
+        const oldName = window.groupData.players[parseInt(editIndex)];
         
         // Check if name already exists (and it's not the same player)
-        if (groupData.players.includes(name) && name !== oldName) {
+        if (window.groupData.players.includes(name) && name !== oldName) {
           showToast('Player already exists', true);
           return;
         }
         
         // Initialize playerInfo if needed
-        if (!groupData.playerInfo) groupData.playerInfo = {};
+        if (!window.groupData.playerInfo) window.groupData.playerInfo = {};
         
         // Update player name everywhere
-        groupData.players[parseInt(editIndex)] = name;
+        window.groupData.players[parseInt(editIndex)] = name;
         
         // Update playerInfo (preserve dateAdded)
-        if (groupData.playerInfo[oldName]) {
-          groupData.playerInfo[name] = groupData.playerInfo[oldName];
-          delete groupData.playerInfo[oldName];
+        if (window.groupData.playerInfo[oldName]) {
+          window.groupData.playerInfo[name] = window.groupData.playerInfo[oldName];
+          delete window.groupData.playerInfo[oldName];
         }
         
         // Update name in all poker nights
-        groupData.nights.forEach(night => {
+        window.groupData.nights.forEach(night => {
           night.results.forEach(result => {
             if (result.player === oldName) {
               result.player = name;
@@ -2944,18 +2944,18 @@
         showToast('Player updated!');
       } else {
         // Adding new player
-        if (groupData.players.includes(name)) {
+        if (window.groupData.players.includes(name)) {
           showToast('Player already exists', true);
           return;
         }
         
         // Initialize playerInfo if needed
-        if (!groupData.playerInfo) groupData.playerInfo = {};
+        if (!window.groupData.playerInfo) window.groupData.playerInfo = {};
         
-        groupData.players.push(name);
+        window.groupData.players.push(name);
         
         // Track when player was added
-        groupData.playerInfo[name] = {
+        window.groupData.playerInfo[name] = {
           dateAdded: new Date().toISOString()
         };
         
@@ -2972,7 +2972,7 @@
     }
 
     function editPlayer(index) {
-      const playerName = groupData.players[index];
+      const playerName = window.groupData.players[index];
       
       document.getElementById('addPlayerModal').dataset.editIndex = index;
       document.getElementById('playerName').value = playerName;
@@ -2985,11 +2985,11 @@
     async function deletePlayer(index) {
       if (!confirm('Delete this player? This will remove them from all games.')) return;
       
-      const playerName = groupData.players[index];
-      groupData.players.splice(index, 1);
+      const playerName = window.groupData.players[index];
+      window.groupData.players.splice(index, 1);
       
       // Remove from all nights
-      groupData.nights.forEach(night => {
+      window.groupData.nights.forEach(night => {
         night.results = night.results.filter(r => r.player !== playerName);
       });
       
@@ -3001,20 +3001,20 @@
     async function deleteNight(index) {
       if (!confirm('Delete this poker night?')) return;
       
-      groupData.nights.splice(index, 1);
+      window.groupData.nights.splice(index, 1);
       await saveGroupData();
       showToast('Night deleted');
       loadNights();
     }
 
     function openSettings() {
-      document.getElementById('settingsCurrency').value = groupData.settings?.currency || '$';
-      document.getElementById('settingsDefaultBuyIn').value = groupData.settings?.defaultBuyIn || 20;
+      document.getElementById('settingsCurrency').value = window.groupData.settings?.currency || '$';
+      document.getElementById('settingsDefaultBuyIn').value = window.groupData.settings?.defaultBuyIn || 20;
       document.getElementById('settingsModal').classList.add('active');
     }
 
     async function saveSettings() {
-      groupData.settings = {
+      window.groupData.settings = {
         currency: document.getElementById('settingsCurrency').value,
         defaultBuyIn: parseFloat(document.getElementById('settingsDefaultBuyIn').value)
       };
@@ -3025,12 +3025,12 @@
     }
 
     function exportData() {
-      const dataStr = JSON.stringify(groupData, null, 2);
+      const dataStr = JSON.stringify(window.groupData, null, 2);
       const dataBlob = new Blob([dataStr], { type: 'application/json' });
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `poker-data-${groupData.id}-${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `poker-data-${window.groupData.id}-${new Date().toISOString().split('T')[0]}.json`;
       link.click();
       showToast('Data exported!');
     }
@@ -3044,7 +3044,7 @@
         try {
           const imported = JSON.parse(e.target.result);
           if (confirm('This will replace all current data. Continue?')) {
-            groupData = imported;
+            window.groupData = imported;
             await saveGroupData();
             showToast('Data imported!');
             updateUI();
@@ -3058,9 +3058,9 @@
 
     async function saveGroupData() {
       try {
-        console.log('Saving group data...', groupData);
-        const groupRef = window.firestore.doc(window.db, 'groups', groupId);
-        await window.firestore.updateDoc(groupRef, groupData);
+        console.log('Saving group data...', window.groupData);
+        const groupRef = window.firestore.doc(window.db, 'groups', window.groupId);
+        await window.firestore.updateDoc(groupRef, window.groupData);
         console.log('Group data saved successfully!');
       } catch (error) {
         console.error('Error saving:', error);
@@ -3068,6 +3068,7 @@
         throw error;
       }
     }
+    window.saveGroupData = saveGroupData;
 
     function openModal(modalId) {
       document.getElementById(modalId).classList.add('active');
@@ -3107,13 +3108,13 @@
     }
 
     function showMessageBanner() {
-      if (!groupData.message || !groupData.message.text) {
+      if (!window.groupData.message || !window.groupData.message.text) {
         hideMessageBanner();
         return;
       }
       
       const banner = document.getElementById('messageBanner');
-      const msg = groupData.message;
+      const msg = window.groupData.message;
       
       document.getElementById('messageTitle').textContent = msg.title || 'Announcement';
       document.getElementById('messageText').textContent = msg.text;
@@ -3132,13 +3133,13 @@
 
     function dismissMessage() {
       hideMessageBanner();
-      localStorage.setItem(`dismissed-${groupId}`, groupData.message?.postedAt || '');
+      localStorage.setItem(`dismissed-${window.groupId}`, window.groupData.message?.postedAt || '');
     }
 
     function checkDismissed() {
-      if (!groupData.message) return true;
-      const dismissed = localStorage.getItem(`dismissed-${groupId}`);
-      return dismissed === groupData.message.postedAt;
+      if (!window.groupData.message) return true;
+      const dismissed = localStorage.getItem(`dismissed-${window.groupId}`);
+      return dismissed === window.groupData.message.postedAt;
     }
 
     function showToast(message, isError = false) {
@@ -3156,6 +3157,9 @@
     }
   </script>
 
+<script src="v4-enhancements.js"></script>
+<script src="v4-spotify.js"></script>
+<script src="v4-poker-coach.js"></script>
 <script src="v4-voting.js"></script>
 </body>
 </html>
