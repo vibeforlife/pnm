@@ -586,6 +586,183 @@
       background: var(--error);
     }
 
+    /* Message Banner */
+    .message-banner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.2));
+      border: 2px solid var(--accent-purple);
+      border-radius: 16px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      animation: slideDown 0.5s ease-out;
+    }
+
+    .message-banner.warning {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(251, 191, 36, 0.2));
+      border-color: var(--warning);
+    }
+
+    .message-banner.urgent {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(248, 113, 113, 0.2));
+      border-color: var(--error);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+      }
+    }
+
+    .message-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    .message-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .message-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+    }
+
+    .message-text {
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.5;
+      margin-bottom: 5px;
+    }
+
+    .message-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .message-close {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      color: var(--text-primary);
+      font-size: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .message-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(90deg);
+    }
+
+    /* Floating Action Button */
+    .fab {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    .fab:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+    }
+
+    .fab:active {
+      transform: scale(0.95);
+    }
+
+    /* Hand Ranking Cards */
+    .hand-ranking-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+
+    .hand-ranking-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent-cyan);
+    }
+
+    .hand-rank {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .hand-info {
+      flex: 1;
+    }
+
+    .hand-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+    }
+
+    .hand-cards {
+      font-family: 'Space Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      margin-bottom: 5px;
+      letter-spacing: 2px;
+    }
+
+    .hand-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .container {
@@ -873,6 +1050,17 @@
   </div>
 
   <div class="container">
+    
+    <!-- Admin Message Banner -->
+    <div class="message-banner" id="messageBanner" style="display: none;">
+      <div class="message-icon">📢</div>
+      <div class="message-content">
+        <div class="message-title" id="messageTitle">Admin Message</div>
+        <div class="message-text" id="messageText"></div>
+        <div class="message-meta" id="messageMeta"></div>
+      </div>
+      <button class="message-close" onclick="dismissMessage()">×</button>
+    </div>
     <!-- Tabs -->
     <div class="tabs">
       <div class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
@@ -1148,9 +1336,149 @@
       
       <hr style="border-color: var(--glass-border); margin: 20px 0;">
       
+      <div class="form-group">
+        <label class="form-label">📢 Post Message to Group</label>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
+          Send announcements to all players (appears as top banner)
+        </div>
+        <input type="text" class="form-input" id="messageInputTitle" placeholder="Message title (e.g., 'Game Tonight!')" maxlength="50" style="margin-bottom: 10px;">
+        <textarea class="form-textarea" id="messageInputText" placeholder="Message details (e.g., '7pm at Bob\'s House - bring snacks!')" maxlength="200"></textarea>
+      </div>
+      
+      <button class="btn btn-primary" onclick="postMessage()" style="width: 100%; margin-bottom: 10px;">
+        📢 Post Message
+      </button>
+      
+      <div id="currentMessage" style="margin-top: 15px;"></div>
+      
+      <hr style="border-color: var(--glass-border); margin: 20px 0;">
+      
       <button class="btn btn-secondary" onclick="exportData()" style="width: 100%; margin-bottom: 10px;">📥 Export Data</button>
       <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()" style="width: 100%;">📤 Import Data</button>
       <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+    </div>
+  </div>
+
+  <!-- Floating Action Button (Hand Rankings) -->
+  <div class="fab" onclick="openModal('handRankingsModal')" title="Poker Hand Rankings">
+    🎴
+  </div>
+
+  <!-- Hand Rankings Modal -->
+  <div class="modal" id="handRankingsModal" onclick="if(event.target.id==='handRankingsModal') closeModal('handRankingsModal')">
+    <div class="modal-content" style="max-width: 600px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">🎴 Poker Hand Rankings</div>
+        <button class="modal-close" onclick="closeModal('handRankingsModal')">×</button>
+      </div>
+      
+      <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; text-align: center;">
+        From highest to lowest
+      </div>
+      
+      <!-- Royal Flush -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">1</div>
+        <div class="hand-info">
+          <div class="hand-name">Royal Flush</div>
+          <div class="hand-cards">A<span style="color:#06b6d4;">♠</span> K<span style="color:#06b6d4;">♠</span> Q<span style="color:#06b6d4;">♠</span> J<span style="color:#06b6d4;">♠</span> 10<span style="color:#06b6d4;">♠</span></div>
+          <div class="hand-desc">Ace, King, Queen, Jack, Ten of the same suit</div>
+        </div>
+      </div>
+      
+      <!-- Straight Flush -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">2</div>
+        <div class="hand-info">
+          <div class="hand-name">Straight Flush</div>
+          <div class="hand-cards">9<span style="color:#ef4444;">♥</span> 8<span style="color:#ef4444;">♥</span> 7<span style="color:#ef4444;">♥</span> 6<span style="color:#ef4444;">♥</span> 5<span style="color:#ef4444;">♥</span></div>
+          <div class="hand-desc">Five cards in sequence, all of the same suit</div>
+        </div>
+      </div>
+      
+      <!-- Four of a Kind -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">3</div>
+        <div class="hand-info">
+          <div class="hand-name">Four of a Kind</div>
+          <div class="hand-cards">K<span style="color:#06b6d4;">♣</span> K<span style="color:#ef4444;">♦</span> K<span style="color:#ef4444;">♥</span> K<span style="color:#06b6d4;">♠</span> 3<span style="color:#06b6d4;">♣</span></div>
+          <div class="hand-desc">Four cards of the same rank</div>
+        </div>
+      </div>
+      
+      <!-- Full House -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">4</div>
+        <div class="hand-info">
+          <div class="hand-name">Full House</div>
+          <div class="hand-cards">Q<span style="color:#06b6d4;">♠</span> Q<span style="color:#ef4444;">♥</span> Q<span style="color:#ef4444;">♦</span> 7<span style="color:#06b6d4;">♣</span> 7<span style="color:#06b6d4;">♠</span></div>
+          <div class="hand-desc">Three of a kind plus a pair</div>
+        </div>
+      </div>
+      
+      <!-- Flush -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">5</div>
+        <div class="hand-info">
+          <div class="hand-name">Flush</div>
+          <div class="hand-cards">K<span style="color:#ef4444;">♦</span> J<span style="color:#ef4444;">♦</span> 8<span style="color:#ef4444;">♦</span> 5<span style="color:#ef4444;">♦</span> 3<span style="color:#ef4444;">♦</span></div>
+          <div class="hand-desc">Five cards of the same suit, not in sequence</div>
+        </div>
+      </div>
+      
+      <!-- Straight -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">6</div>
+        <div class="hand-info">
+          <div class="hand-name">Straight</div>
+          <div class="hand-cards">10<span style="color:#ef4444;">♥</span> 9<span style="color:#06b6d4;">♠</span> 8<span style="color:#06b6d4;">♣</span> 7<span style="color:#ef4444;">♦</span> 6<span style="color:#ef4444;">♥</span></div>
+          <div class="hand-desc">Five cards in sequence, different suits</div>
+        </div>
+      </div>
+      
+      <!-- Three of a Kind -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">7</div>
+        <div class="hand-info">
+          <div class="hand-name">Three of a Kind</div>
+          <div class="hand-cards">7<span style="color:#06b6d4;">♠</span> 7<span style="color:#ef4444;">♦</span> 7<span style="color:#06b6d4;">♣</span> K<span style="color:#ef4444;">♥</span> 2<span style="color:#06b6d4;">♠</span></div>
+          <div class="hand-desc">Three cards of the same rank</div>
+        </div>
+      </div>
+      
+      <!-- Two Pair -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">8</div>
+        <div class="hand-info">
+          <div class="hand-name">Two Pair</div>
+          <div class="hand-cards">J<span style="color:#ef4444;">♥</span> J<span style="color:#06b6d4;">♣</span> 4<span style="color:#06b6d4;">♠</span> 4<span style="color:#ef4444;">♦</span> 9<span style="color:#ef4444;">♥</span></div>
+          <div class="hand-desc">Two different pairs</div>
+        </div>
+      </div>
+      
+      <!-- One Pair -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">9</div>
+        <div class="hand-info">
+          <div class="hand-name">One Pair</div>
+          <div class="hand-cards">10<span style="color:#ef4444;">♦</span> 10<span style="color:#06b6d4;">♠</span> K<span style="color:#06b6d4;">♣</span> 6<span style="color:#06b6d4;">♠</span> 3<span style="color:#ef4444;">♥</span></div>
+          <div class="hand-desc">Two cards of the same rank</div>
+        </div>
+      </div>
+      
+      <!-- High Card -->
+      <div class="hand-ranking-card">
+        <div class="hand-rank">10</div>
+        <div class="hand-info">
+          <div class="hand-name">High Card</div>
+          <div class="hand-cards">A<span style="color:#ef4444;">♦</span> J<span style="color:#ef4444;">♥</span> 8<span style="color:#06b6d4;">♣</span> 5<span style="color:#06b6d4;">♠</span> 2<span style="color:#ef4444;">♦</span></div>
+          <div class="hand-desc">No matching cards - highest card wins</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; padding: 15px; background: rgba(99, 102, 241, 0.1); border: 1px solid var(--accent-purple); border-radius: 12px; font-size: 13px; text-align: center; color: var(--text-secondary);">
+        💡 In case of tie, highest card in the hand wins
+      </div>
     </div>
   </div>
 
@@ -1223,9 +1551,17 @@
       window.firestore.onSnapshot(groupRef, (doc) => {
         if (doc.exists()) {
           groupData = doc.data();
+          window.groupData = groupData;  // Expose for v4-enhancements.js
+          window.groupId = groupId;      // Expose for v4-enhancements.js
           updateUI();
         }
       });
+      
+      // Expose functions for v4-enhancements.js
+      window.saveGroupData = saveGroupData;
+      window.editNight = editNight;
+      window.editPlayer = editPlayer;
+      window.switchTab = switchTab;
     }
 
     async function loadGroupData() {
@@ -1240,6 +1576,8 @@
         }
 
         groupData = groupSnap.data();
+        window.groupData = groupData;  // Expose for v4-enhancements.js
+        window.groupId = groupId;      // Expose for v4-enhancements.js
         
         // Initialize default structure if needed
         if (!groupData.players) groupData.players = [];
@@ -1261,6 +1599,11 @@
       // Update header
       document.getElementById('headerGroupName').textContent = groupData.name;
       document.getElementById('headerGroupCode').textContent = groupData.id;
+
+      // Show message banner if exists and not dismissed
+      if (!checkDismissed()) {
+        showMessageBanner();
+      }
 
       // Update dashboard
       updateDashboard();
@@ -2195,6 +2538,11 @@
       // Check if editing existing night
       const editIndex = document.getElementById('addNightModal').dataset.editIndex;
       if (editIndex !== undefined && editIndex !== '') {
+        // PRESERVE existing photos when updating!
+        const existingNight = groupData.nights[parseInt(editIndex)];
+        if (existingNight && existingNight.photos) {
+          night.photos = existingNight.photos;
+        }
         groupData.nights[parseInt(editIndex)] = night;
         showToast('Poker night updated!');
       } else {
@@ -2636,10 +2984,21 @@
         // Update player name everywhere
         groupData.players[parseInt(editIndex)] = name;
         
-        // Update playerInfo (preserve dateAdded)
+        // Update playerInfo (preserve dateAdded and photos!)
         if (groupData.playerInfo[oldName]) {
-          groupData.playerInfo[name] = groupData.playerInfo[oldName];
-          delete groupData.playerInfo[oldName];
+          // If renaming, move the entire playerInfo
+          if (name !== oldName) {
+            groupData.playerInfo[name] = groupData.playerInfo[oldName];
+            delete groupData.playerInfo[oldName];
+          }
+          // If name unchanged, playerInfo already has the data
+        } else {
+          // Create playerInfo if it doesn't exist
+          if (!groupData.playerInfo[name]) {
+            groupData.playerInfo[name] = {
+              dateAdded: new Date().toISOString()
+            };
+          }
         }
         
         // Update name in all poker nights
@@ -2720,6 +3079,7 @@
     function openSettings() {
       document.getElementById('settingsCurrency').value = groupData.settings?.currency || '$';
       document.getElementById('settingsDefaultBuyIn').value = groupData.settings?.defaultBuyIn || 20;
+      displayCurrentMessage();
       document.getElementById('settingsModal').classList.add('active');
     }
 
@@ -2732,6 +3092,120 @@
       await saveGroupData();
       closeModal('settingsModal');
       showToast('Settings saved!');
+      
+      // Refresh current message display
+      displayCurrentMessage();
+    }
+
+    async function postMessage() {
+      const title = document.getElementById('messageInputTitle').value.trim();
+      const text = document.getElementById('messageInputText').value.trim();
+      
+      if (!title && !text) {
+        showToast('Please enter a message', true);
+        return;
+      }
+      
+      if (!groupData.message) {
+        groupData.message = {};
+      }
+      
+      groupData.message = {
+        title: title || 'Announcement',
+        text: text,
+        postedBy: 'Admin',
+        postedAt: new Date().toISOString(),
+        type: 'info'  // info, warning, urgent
+      };
+      
+      await saveGroupData();
+      
+      // Clear form
+      document.getElementById('messageInputTitle').value = '';
+      document.getElementById('messageInputText').value = '';
+      
+      showToast('Message posted! 📢');
+      displayCurrentMessage();
+      showMessageBanner();
+    }
+
+    function displayCurrentMessage() {
+      const currentMessageDiv = document.getElementById('currentMessage');
+      
+      if (!groupData.message || !groupData.message.text) {
+        currentMessageDiv.innerHTML = '<div style="font-size:13px; color:var(--text-secondary); text-align:center;">No active message</div>';
+        return;
+      }
+      
+      const msg = groupData.message;
+      const date = new Date(msg.postedAt).toLocaleDateString('en-US', { 
+        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+      });
+      
+      currentMessageDiv.innerHTML = `
+        <div style="padding: 12px; background: rgba(99, 102, 241, 0.1); border: 1px solid var(--accent-purple); border-radius: 12px;">
+          <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+            <div style="font-size:14px; font-weight:700; color:var(--text-primary);">Current Message:</div>
+            <button class="btn btn-danger btn-small" onclick="clearMessage()">Clear</button>
+          </div>
+          <div style="font-size:13px; font-weight:600; color:var(--accent-cyan); margin-bottom:4px;">${msg.title}</div>
+          <div style="font-size:13px; color:var(--text-secondary); margin-bottom:6px;">${msg.text}</div>
+          <div style="font-size:11px; color:var(--text-secondary);">Posted ${date}</div>
+        </div>
+      `;
+    }
+
+    async function clearMessage() {
+      if (!confirm('Clear the current message?')) {
+        return;
+      }
+      
+      groupData.message = null;
+      await saveGroupData();
+      showToast('Message cleared');
+      displayCurrentMessage();
+      hideMessageBanner();
+    }
+
+    function showMessageBanner() {
+      if (!groupData.message || !groupData.message.text) {
+        hideMessageBanner();
+        return;
+      }
+      
+      const banner = document.getElementById('messageBanner');
+      const msg = groupData.message;
+      
+      document.getElementById('messageTitle').textContent = msg.title || 'Announcement';
+      document.getElementById('messageText').textContent = msg.text;
+      
+      const date = new Date(msg.postedAt).toLocaleDateString('en-US', { 
+        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' 
+      });
+      document.getElementById('messageMeta').textContent = `Posted by ${msg.postedBy} • ${date}`;
+      
+      // Set type styling
+      banner.className = 'message-banner';
+      if (msg.type === 'warning') banner.classList.add('warning');
+      if (msg.type === 'urgent') banner.classList.add('urgent');
+      
+      banner.style.display = 'flex';
+    }
+
+    function hideMessageBanner() {
+      document.getElementById('messageBanner').style.display = 'none';
+    }
+
+    function dismissMessage() {
+      // Just hide, don't clear from database
+      hideMessageBanner();
+      localStorage.setItem(`dismissed-${groupId}`, groupData.message?.postedAt || '');
+    }
+
+    function checkDismissed() {
+      if (!groupData.message) return true;
+      const dismissed = localStorage.getItem(`dismissed-${groupId}`);
+      return dismissed === groupData.message.postedAt;
     }
 
     function exportData() {
@@ -2777,6 +3251,10 @@
         showToast('Error saving data: ' + error.message, true);
         throw error;
       }
+    }
+
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
     }
 
     function closeModal(modalId) {
@@ -2826,5 +3304,10 @@
       init();
     }
   </script>
+
+<script src="v4-enhancements.js"></script>
+<script src="v4-spotify.js"></script>
+<script src="v4-voting.js"></script>
+<script src="v4-admin-tools.js"></script>
 </body>
 </html>
