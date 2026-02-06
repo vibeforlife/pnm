@@ -126,72 +126,39 @@
     
     // Remove data:image/...;base64, prefix if present
     const imageData = base64Image.split(',')[1] || base64Image;
-    const mediaType = base64Image.match(/data:(image\/[^;]+)/)?.[1] || 'image/jpeg';
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1024,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: mediaType,
-                  data: imageData
-                }
-              },
-              {
-                type: 'text',
-                text: `You are a professional poker coach. Analyze this poker table image and provide strategic advice.
+    try {
+      // Call Firebase Cloud Function instead of direct API
+      const analyzeFunction = window.firebase.functions().httpsCallable('analyzePokerHand');
+      const result = await analyzeFunction({
+        imageData: imageData,
+        apiKey: apiKey
+      });
 
-Please identify:
-1. The player's hole cards (if visible)
-2. Community cards on the board (if any)
-3. Current hand strength
-4. Possible opponent hands
-5. Win probability estimate
-6. Strategic recommendation (fold/call/raise and why)
+      if (!result.data.success) {
+        throw new Error(result.data.error || 'Analysis failed');
+      }
 
-Format your response clearly with sections. Be concise but informative. If cards are unclear, say so.`
-              }
-            ]
-          }
-        ]
-      })
-    });
+      const analysis = result.data.analysis;
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error?.message || 'API request failed');
-    }
-
-    const data = await response.json();
-    const analysis = data.content[0].text;
-
-    // Display the analysis
-    document.getElementById('aiAnalysisResult').innerHTML = `
-      <div style="padding:20px; background:rgba(99,102,241,0.1); border:1px solid var(--accent-purple); border-radius:12px;">
-        <div style="font-size:14px; font-weight:600; color:var(--accent-cyan); margin-bottom:12px;">
-          🤖 AI Analysis
-        </div>
-        <div style="font-size:13px; color:var(--text-primary); line-height:1.6; white-space:pre-wrap;">
+      // Display the analysis
+      document.getElementById('aiAnalysisResult').innerHTML = `
+        <div style="padding:20px; background:rgba(99,102,241,0.1); border:1px solid var(--accent-purple); border-radius:12px;">
+          <div style="font-size:14px; font-weight:600; color:var(--accent-cyan); margin-bottom:12px;">
+            🤖 AI Analysis
+          </div>
+          <div style="font-size:13px; color:var(--text-primary); line-height:1.6; white-space:pre-wrap;">
 ${analysis}
+          </div>
         </div>
-      </div>
-      <div style="margin-top:12px; padding:12px; background:rgba(245,158,11,0.1); border:1px solid var(--warning); border-radius:8px; font-size:11px; color:var(--text-secondary);">
-        ⚠️ <strong>Reminder:</strong> AI analysis is for learning and casual games. Using AI in tournaments or serious money games may be unethical.
-      </div>
-    `;
+        <div style="margin-top:12px; padding:12px; background:rgba(245,158,11,0.1); border:1px solid var(--warning); border-radius:8px; font-size:11px; color:var(--text-secondary);">
+          ⚠️ <strong>Reminder:</strong> AI analysis is for learning and casual games. Using AI in tournaments or serious money games may be unethical.
+        </div>
+      `;
+    } catch (error) {
+      console.error('Firebase function error:', error);
+      throw new Error(error.message || 'Analysis failed');
+    }
   }
 
   // ============================================================================
