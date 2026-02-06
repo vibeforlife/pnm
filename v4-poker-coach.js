@@ -128,18 +128,32 @@
     const imageData = base64Image.split(',')[1] || base64Image;
 
     try {
-      // Call Firebase Cloud Function instead of direct API
-      const analyzeFunction = window.firebase.functions().httpsCallable('analyzePokerHand');
-      const result = await analyzeFunction({
-        imageData: imageData,
-        apiKey: apiKey
+      // Call Firebase Cloud Function using fetch (since functions SDK not imported)
+      const response = await fetch('https://us-central1-pnm-fx2.cloudfunctions.net/analyzePokerHand', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          data: {
+            imageData: imageData,
+            apiKey: apiKey
+          }
+        })
       });
 
-      if (!result.data.success) {
-        throw new Error(result.data.error || 'Analysis failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Function call failed');
       }
 
-      const analysis = result.data.analysis;
+      const result = await response.json();
+      
+      if (!result.result.success) {
+        throw new Error(result.result.error || 'Analysis failed');
+      }
+
+      const analysis = result.result.analysis;
 
       // Display the analysis
       document.getElementById('aiAnalysisResult').innerHTML = `
