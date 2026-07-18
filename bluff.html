@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fold & Furious Poker Bluff Prototype</title>
+  <style>
+    :root {
+      --bg: #071016;
+      --bg2: #0a151f;
+      --panel: rgba(10, 21, 31, 0.84);
+      --panel2: rgba(12, 27, 40, 0.82);
+      --line: rgba(117, 255, 215, 0.18);
+      --line2: rgba(67, 167, 255, 0.2);
+      --text: #edfff8;
+      --muted: #90bdb1;
+      --faint: #5f7e78;
+      --good: #51f3ba;
+      --warn: #ffcb6b;
+      --bad: #ff5e82;
+      --accent: #79ffd5;
+      --accent2: #42a9ff;
+      --shadow: 0 0 0 1px rgba(121,255,213,0.13),
+        0 18px 40px rgba(0,0,0,0.24),
+        0 0 32px rgba(66,169,255,0.08);
+      --radius: 20px;
+      --radius-sm: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 15% 8%, rgba(66,169,255,0.12), transparent 22%),
+        radial-gradient(circle at 84% 0%, rgba(121,255,213,0.08), transparent 20%),
+        linear-gradient(180deg, #071018 0%, #08121b 48%, #060d13 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+        Segoe UI, Roboto, sans-serif;
+    }
+    body { padding: 10px; }
+    .app {
+      height: calc(100vh - 20px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.95fr);
+      gap: 10px;
+    }
+    .panel {
+      position: relative;
+      background: linear-gradient(
+        180deg,
+        rgba(10,21,31,0.88),
+        rgba(11,25,37,0.76)
+      );
+      border: 1px solid rgba(121,255,213,0.12);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      min-height: 0;
+    }
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(121,255,213,0.03),
+        transparent 30%,
+        rgba(66,169,255,0.04)
+      );
+      pointer-events: none;
+    }
+    .left {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 0;
+    }
+    .topbar {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(121,255,213,0.08);
+    }
+    .brand { display:flex; align-items:center; gap: 10px; min-width: 0; }
+    .logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(121,255,213,0.24);
+      background: linear-gradient(
+        135deg,
+        rgba(121,255,213,0.14),
+        rgba(66,169,255,0.12)
+      );
+      flex: 0 0 auto;
+    }
+    .logo svg { width: 20px; height: 20px; }
+    .kicker {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: var(--muted);
+    }
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .chips {
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+    .chip {
+      border:1px solid rgba(121,255,213,0.12);
+      padding: 7px 10px;
+      border-radius:999px;
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(9,18,27,0.45);
+      white-space: nowrap;
+    }
+    .button {
+      appearance: none;
+      border:none;
+      cursor:pointer;
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      color: var(--text);
+      background: linear-gradient(
+        135deg,
+        rgba(121,255,213,0.18),
+        rgba(66,169,255,0.18)
+      );
+    }
+    .stage {
+      position: relative;
+      min-height: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at center, rgba(66,169,255,0.08), transparent 38%),
+        linear-gradient(180deg, rgba(7,14,21,0.92), rgba(5,10,16,0.96));
+    }
+    video, canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    .grid-overlay {
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(rgba(121,255,213,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(121,255,213,0.05) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(circle at center, black 46%, transparent 90%);
+    }
+    .hud-ring {
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:min(42vw, 320px);
+      height:min(42vw, 320px);
+      border-radius:50%;
+      border:1px solid rgba(121,255,213,0.22);
+      box-shadow:
+        0 0 30px rgba(121,255,213,0.08),
+        inset 0 0 25px rgba(66,169,255,0.06);
+      animation: pulse 3.4s ease-in-out infinite;
+      pointer-events:none;
+    }
+    .hud-ring::before,
+    .hud-ring::after {
+      content:"";
+      position:absolute;
+      inset: 18px;
+      border-radius:50%;
+      border:1px dashed rgba(66,169,255,0.18);
+    }
+    .hud-ring::after {
+      inset: 48px;
+      border-style: solid;
+      opacity: .45;
+    }
+    @keyframes pulse {
+      0%,100% {
+        transform:translate(-50%,-50%) scale(.985);
+        opacity:.9;
+      }
+      50% {
+        transform:translate(-50%,-50%) scale(1.02);
+        opacity:1;
+      }
+    }
+
+    .overlay-cards {
+      position:absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      pointer-events:none;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .mini-card {
+      background: rgba(7,18,27,0.76);
+      border: 1px solid rgba(121,255,213,0.11);
+      border-radius: 14px;
+      padding: 8px 10px;
+      box-shadow: var(--shadow);
+    }
+    .mini-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: var(--faint);
+    }
+    .mini-value {
+      margin-top: 4px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .legend {
+      position:absolute;
+      right:10px;
+      top:10px;
+      pointer-events:none;
+      width: 168px;
+      padding: 10px 11px;
+      border-radius: 14px;
+      background: rgba(7,18,27,0.72);
+      border:1px solid rgba(121,255,213,0.12);
+    }
+    .legend h3 {
+      margin:0 0 8px;
+      font-size:11px;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: var(--muted);
+    }
+    .legend-row {
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      font-size:11px;
+      padding:5px 0;
+    }
+    .legend-row span:last-child { color: var(--muted); }
+
+    .left-controls {
+      padding: 10px 12px 12px;
+      border-top: 1px solid rgba(121,255,213,0.08);
+    }
+    .left-controls .kicker {
+      margin-bottom: 8px;
+    }
+    .controls-grid-left {
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .control {
+      background: rgba(8,18,27,0.62);
+      border:1px solid rgba(121,255,213,0.09);
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .control label {
+      display:block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .control input[type="range"] { width:100%; }
+    .control .small {
+      margin-top: 6px;
+      color: var(--faint);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+    .left-disclaimer {
+      margin-top: 8px;
+      padding: 8px 9px;
+      border-radius: 14px;
+      background: rgba(255,203,107,0.08);
+      border:1px solid rgba(255,203,107,0.18);
+      color: #f5ddb0;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .right {
+      display:grid;
+      grid-template-rows: auto auto auto 1fr;
+      gap: 10px;
+      min-height: 0;
+    }
+    .card-pad { padding: 12px; }
+    .status-pill {
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding: 8px 12px;
+      border-radius:999px;
+      text-transform:uppercase;
+      letter-spacing:.09em;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .low {
+      background: rgba(81,243,186,0.12);
+      color: var(--good);
+      border:1px solid rgba(81,243,186,0.24);
+    }
+    .mid {
+      background: rgba(255,203,107,0.12);
+      color: var(--warn);
+      border:1px solid rgba(255,203,107,0.24);
+    }
+    .high {
+      background: rgba(255,94,130,0.12);
+      color: var(--bad);
+      border:1px solid rgba(255,94,130,0.24);
+    }
+    .hero-grid {
+      display:grid;
+      grid-template-columns: minmax(0, 1fr) 160px;
+      gap: 12px;
+      align-items:center;
+      margin-top: 10px;
+    }
+    .big-number {
+      font-size: clamp(42px, 7vw, 76px);
+      line-height:.9;
+      font-weight: 800;
+      letter-spacing: -.05em;
+    }
+    .sub {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .emotion-line {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .emotion-label {
+      font-weight: 600;
+      color: #ffe08a;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,224,138,0.35);
+      background: rgba(255,224,138,0.08);
+    }
+    .cal {
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items:center;
+      margin-top: 10px;
+      padding: 9px 10px;
+      border-radius: 14px;
+      background: rgba(121,255,213,0.05);
+      border:1px solid rgba(121,255,213,0.1);
+    }
+    .cal strong { display:block; font-size: 12px; }
+    .cal span { color: var(--muted); font-size: 11px; }
+    .bar {
+      height: 7px;
+      background: rgba(255,255,255,0.06);
+      border-radius:999px;
+      overflow:hidden;
+    }
+    .bar > span {
+      display:block;
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .gauge {
+      width: 160px;
+      height: 160px;
+      position:relative;
+      justify-self:end;
+    }
+    .gauge svg {
+      width:100%;
+      height:100%;
+      transform: rotate(-90deg);
+    }
+    .gauge-center {
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      text-align:center;
+    }
+    .gauge-center .tiny {
+      font-size: 10px;
+      color: var(--faint);
+      text-transform:uppercase;
+      letter-spacing:.14em;
+    }
+    .gauge-center .score {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .metrics-grid {
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .metric {
+      background: rgba(8,18,27,0.62);
+      border:1px solid rgba(121,255,213,0.09);
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .metric .name { font-size: 11px; color: var(--muted); }
+    .metric .value {
+      margin-top: 6px;
+      display:flex;
+      justify-content:space-between;
+      align-items:end;
+      gap:8px;
+    }
+    .metric strong { font-size: 20px; }
+    .metric .band { font-size: 11px; color: var(--muted); }
+    .metric .line {
+      height: 6px;
+      margin-top: 9px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.06);
+      overflow:hidden;
+    }
+    .metric .line > span {
+      display:block;
+      height:100%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .charts-grid {
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .chart-card {
+      background: rgba(8,18,27,0.62);
+      border:1px solid rgba(121,255,213,0.09);
+      border-radius: 16px;
+      padding: 10px;
+    }
+    .chart-head {
+      display:flex;
+      justify-content:space-between;
+      gap: 8px;
+      align-items:center;
+      margin-bottom: 8px;
+    }
+    .chart-head h4 { margin:0; font-size: 12px; }
+    .chart-head span { font-size: 10px; color: var(--muted); }
+    .spark { width:100%; height: 52px; }
+
+    @media (max-width: 1120px) {
+      html, body { overflow: auto; }
+      .app { height: auto; grid-template-columns: 1fr; }
+      .left { min-height: 62vh; }
+    }
+    @media (max-width: 720px) {
+      body { padding: 8px; }
+      .hero-grid,
+      .metrics-grid,
+      .charts-grid,
+      .controls-grid-left,
+      .overlay-cards {
+        grid-template-columns: 1fr;
+      }
+      .legend { width: 148px; }
+      .gauge { justify-self:start; }
+      .chips { justify-content:flex-start; }
+      .topbar { align-items:flex-start; flex-direction:column; }
+      .app { gap: 8px; }
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="app">
+    <section class="panel left">
+      <div class="topbar">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4">
+              <path d="M16 49 32 13l16 36" />
+              <path d="M22 36h20" />
+              <circle cx="32" cy="32" r="26" opacity=".35" />
+            </svg>
+          </div>
+          <div>
+            <div class="kicker">Experimental local prototype</div>
+            <div class="title">Fold &amp; Furious Poker Bluff Prototype</div>
+          </div>
+        </div>
+        <div class="chips">
+          <div class="chip" id="modelStatus">Face landmarks: live enhanced overlay</div>
+          <div class="chip" id="fpsStatus">Signal quality: waiting</div>
+          <button class="button" id="startBtn">Start camera</button>
+        </div>
+      </div>
+
+      <div class="stage" id="stage">
+        <video id="video" playsinline muted></video>
+        <canvas id="overlay"></canvas>
+        <div class="grid-overlay"></div>
+        <div class="hud-ring"></div>
+
+        <div class="legend">
+          <h3>Tracked regions</h3>
+          <div class="legend-row">
+            <span>Eyes / iris</span><span id="legendEyes">--</span>
+          </div>
+          <div class="legend-row">
+            <span>Nose axis</span><span id="legendNose">--</span>
+          </div>
+          <div class="legend-row">
+            <span>Gaze vector</span><span id="legendGaze">--</span>
+          </div>
+          <div class="legend-row">
+            <span>Mouth tension</span><span id="legendMouth">--</span>
+          </div>
+          <div class="legend-row">
+            <span>Head drift</span><span id="legendPose">--</span>
+          </div>
+        </div>
+
+        <div class="overlay-cards">
+          <div class="mini-card">
+            <div class="mini-label">Face lock</div>
+            <div class="mini-value" id="faceLock">Offline</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-label">Blink rate</div>
+            <div class="mini-value" id="blinkMini">0/min</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-label">Gaze bias</div>
+            <div class="mini-value" id="gazeMini">Centered</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-label">Baseline state</div>
+            <div class="mini-value" id="baselineState">Pending</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="left-controls">
+        <div class="kicker">Controls</div>
+        <div class="controls-grid-left">
+          <div class="control">
+            <label for="calibrationSeconds">
+              Calibration length:
+              <span id="calibrationSecondsOut">20</span>s
+            </label>
+            <input
+              id="calibrationSeconds"
+              type="range"
+              min="5"
+              max="30"
+              step="1"
+              value="20"
+            />
+            <div class="small">Shorter is faster. Longer is steadier.</div>
+          </div>
+          <div class="control">
+            <label for="sensitivity">
+              Bluff sensitivity:
+              <span id="sensitivityOut">0.62</span>
+            </label>
+            <input
+              id="sensitivity"
+              type="range"
+              min="0.3"
+              max="1"
+              step="0.01"
+              value="0.62"
+            />
+            <div class="small">
+              Higher values push the score toward bluff faster.
+            </div>
+          </div>
+        </div>
+        <div class="left-disclaimer">
+          This prototype runs entirely in your browser using MediaPipe Face Mesh. It infers behavioral signals from face geometry for an entertainment-only bluff guess; it is not a lie detector and should not be used for real decisions [web:29][web:79].
+        </div>
+      </div>
+    </section>
+
+    <aside class="right">
+      <section class="panel card-pad">
+        <div id="statusPill" class="status-pill low">Not bluff</div>
+        <div class="hero-grid">
+          <div>
+            <div class="kicker">Bluff likelihood</div>
+            <div class="big-number">
+              <span id="bluffPct">18</span>
+              <span style="font-size:.46em; color:var(--muted);">%</span>
+            </div>
+            <p class="sub" id="statusText">
+              Low signal. Continue calibration or vary expression to see the HUD react.
+            </p>
+            <div class="emotion-line">
+              <span style="text-transform:uppercase; letter-spacing:.12em; font-size:10px; color:var(--faint);">Emotion</span>
+              <span id="emotionLabel" class="emotion-label">Calm &amp; composed</span>
+            </div>
+            <div class="cal">
+              <div>
+                <strong id="calibrationLabel">Calibration</strong>
+                <span id="calibrationHint">
+                  Hold a neutral face so the app can learn your baseline.
+                </span>
+              </div>
+              <div style="width:112px">
+                <div class="bar">
+                  <span id="calibrationBar"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="gauge">
+            <svg viewBox="0 0 220 220">
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#79ffd5" />
+                  <stop offset="100%" stop-color="#42a9ff" />
+                </linearGradient>
+              </defs>
+              <circle
+                cx="110"
+                cy="110"
+                r="86"
+                stroke="rgba(255,255,255,0.07)"
+                stroke-width="18"
+                fill="none"
+              ></circle>
+              <circle
+                id="gaugeRing"
+                cx="110"
+                cy="110"
+                r="86"
+                stroke="url(#ringGrad)"
+                stroke-width="18"
+                stroke-linecap="round"
+                fill="none"
+                stroke-dasharray="540"
+                stroke-dashoffset="442"
+              ></circle>
+            </svg>
+            <div class="gauge-center">
+              <div class="tiny">status</div>
+              <div class="score" id="gaugeLabel">steady</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel card-pad">
+        <div class="kicker" style="margin-bottom:8px;">Signal metrics</div>
+        <div class="metrics-grid">
+          <div class="metric">
+            <div class="name">Stress trend</div>
+            <div class="value">
+              <strong id="stressVal">22</strong>
+              <span class="band" id="stressBand">Low</span>
+            </div>
+            <div class="line">
+              <span id="stressBar" style="width:22%"></span>
+            </div>
+          </div>
+          <div class="metric">
+            <div class="name">Gaze instability</div>
+            <div class="value">
+              <strong id="gazeVal">16</strong>
+              <span class="band" id="gazeBand">Stable</span>
+            </div>
+            <div class="line">
+              <span id="gazeBar" style="width:16%"></span>
+            </div>
+          </div>
+          <div class="metric">
+            <div class="name">Mouth tension</div>
+            <div class="value">
+              <strong id="mouthVal">19</strong>
+              <span class="band" id="mouthBand">Relaxed</span>
+            </div>
+            <div class="line">
+              <span id="mouthBar" style="width:19%"></span>
+            </div>
+          </div>
+          <div class="metric">
+            <div class="name">Baseline deviation</div>
+            <div class="value">
+              <strong id="baseVal">12</strong>
+              <span class="band" id="baseBand">Near base</span>
+            </div>
+            <div class="line">
+              <span id="baseBar" style="width:12%"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel card-pad">
+        <div class="kicker" style="margin-bottom:8px;">Trend traces</div>
+        <div class="charts-grid">
+          <div class="chart-card">
+            <div class="chart-head">
+              <h4>Stress</h4>
+              <span id="stressLive">22%</span>
+            </div>
+            <svg class="spark" id="stressChart" viewBox="0 0 220 52"></svg>
+          </div>
+          <div class="chart-card">
+            <div class="chart-head">
+              <h4>Gaze</h4>
+              <span id="gazeLive">16%</span>
+            </div>
+            <svg class="spark" id="gazeChart" viewBox="0 0 220 52"></svg>
+          </div>
+          <div class="chart-card">
+            <div class="chart-head">
+              <h4>Mouth</h4>
+              <span id="mouthLive">19%</span>
+            </div>
+            <svg class="spark" id="mouthChart" viewBox="0 0 220 52"></svg>
+          </div>
+          <div class="chart-card">
+            <div class="chart-head">
+              <h4>Blink</h4>
+              <span id="blinkLive">0/min</span>
+            </div>
+            <svg class="spark" id="blinkChart" viewBox="0 0 220 52"></svg>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const video = $("video");
+    const overlay = $("overlay");
+    const ctx = overlay.getContext("2d");
+    const startBtn = $("startBtn");
+    const stage = $("stage");
+    const calibrationSeconds = $("calibrationSeconds");
+    const calibrationSecondsOut = $("calibrationSecondsOut");
+    const sensitivity = $("sensitivity");
+    const sensitivityOut = $("sensitivityOut");
+    const emotionLabel = $("emotionLabel");
+
+    calibrationSeconds.addEventListener("input", () => {
+      calibrationSecondsOut.textContent = calibrationSeconds.value;
+    });
+    sensitivity.addEventListener("input", () => {
+      sensitivityOut.textContent = Number(sensitivity.value).toFixed(2);
+    });
+
+    const sparkState = {
+      stress: Array.from({ length: 32 }, (_, i) => 18 + Math.sin(i / 4) * 5 + Math.random() * 2.5),
+      gaze: Array.from({ length: 32 }, (_, i) => 14 + Math.cos(i / 6) * 4 + Math.random() * 2),
+      mouth: Array.from({ length: 32 }, (_, i) => 16 + Math.sin(i / 5) * 3 + Math.random() * 2),
+      blink: Array.from({ length: 32 }, (_, i) =>
+        i % 10 === 0 ? 8 + Math.random() * 3 : 1 + Math.random() * 1.2
+      ),
+    };
+
+    const state = {
+      running: false,
+      calibrationStartedAt: null,
+      calibrated: false,
+      baseline: { stress: 20, gaze: 16, mouth: 18 },
+      metrics: { stress: 22, gaze: 16, mouth: 19, base: 12, blinkRate: 0, pose: 10 },
+      blinkTimestamps: [],
+      lastEmotionUpdate: 0,
+      lastFeatures: {
+        ear: null,
+        mar: null,
+        gazeNorm: null,
+        poseNorm: null,
+      },
+      featuresChangedThisFrame: false,
+    };
+
+    const calmEmotions = [
+      "Calm & composed",
+      "In the zone",
+      "Zen mode",
+      "Solid & steady",
+      "No bluff vibes",
+      "Patient grinder",
+      "Reads the table",
+      "Cool customer",
+      "Unbothered",
+      "Balanced breathing"
+    ];
+    const mixedEmotions = [
+      "Jesting",
+      "Hiding something",
+      "Semi-bluffing",
+      "Slow playing",
+      "Thinking in ranges",
+      "Balancing range",
+      "Tricky customer",
+      "Floating the flop",
+      "Hero call brewing",
+      "Reverse tell"
+    ];
+    const spicyEmotions = [
+      "Pure bluff",
+      "Double-barrel bluff",
+      "On tilt",
+      "Scared money",
+      "Loose cannon",
+      "On a heater",
+      "Overconfident",
+      "Sandbagging",
+      "All-in energy",
+      "High-stakes heartbeat"
+    ];
+
+    const LEFT_EYE = [33, 160, 158, 133, 153, 144];
+    const RIGHT_EYE = [263, 387, 385, 362, 380, 373];
+    const UPPER_LIP = [13, 312, 82];
+    const LOWER_LIP = [14, 87, 178];
+    const NOSE_BRIDGE = [6, 197, 195, 5, 4, 1];
+
+    function resizeCanvas() {
+      const rect = stage.getBoundingClientRect();
+      overlay.width = rect.width * devicePixelRatio;
+      overlay.height = rect.height * devicePixelRatio;
+      overlay.style.width = rect.width + "px";
+      overlay.style.height = rect.height + "px";
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function pushSeries(key, value) {
+      const arr = sparkState[key];
+      arr.push(value);
+      while (arr.length > 32) arr.shift();
+    }
+
+    function drawSpark(svgId, arr, colorA = "#79ffd5", colorB = "#42a9ff") {
+      const svg = $(svgId);
+      const w = 220,
+        h = 52,
+        pad = 5;
+      const max = Math.max(...arr, 1);
+      const min = Math.min(...arr, 0);
+      const span = Math.max(max - min, 1);
+      const pts = arr.map((v, i) => {
+        const x = (i / (arr.length - 1)) * (w - pad * 2) + pad;
+        const y = h - (((v - min) / span) * (h - pad * 2) + pad);
+        return [x, y];
+      });
+      const line = pts
+        .map(
+          (p, i) =>
+            (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)
+        )
+        .join(" ");
+      const area =
+        line +
+        ` L ${pts[pts.length - 1][0].toFixed(1)} ${h - pad} L ${
+          pts[0][0]
+        } ${h - pad} Z`;
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="${svgId}Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="${colorA}" stop-opacity="0.82"></stop>
+            <stop offset="100%" stop-color="${colorB}" stop-opacity="0.82"></stop>
+          </linearGradient>
+        </defs>
+        <path d="${area}" fill="url(#${svgId}Grad)" opacity="0.12"></path>
+        <path d="${line}" fill="none" stroke="url(#${svgId}Grad)" stroke-width="2.7" stroke-linecap="round"></path>
+      `;
+    }
+
+    function band(v, a, b, labels) {
+      if (v < a) return labels[0];
+      if (v < b) return labels[1];
+      return labels[2];
+    }
+
+    function setMetric(id, value, label) {
+      $(id + "Val").textContent = Math.round(value);
+      $(id + "Bar").style.width = Math.max(0, Math.min(100, value)) + "%";
+      $(id + "Band").textContent = label;
+      const live = $(id + "Live");
+      if (live)
+        live.textContent =
+          id === "blink"
+            ? Math.round(value) + "/min"
+            : Math.round(value) + "%";
+    }
+
+    function updateEmotion(bluff, featuresChanged) {
+      const now = performance.now();
+      if (!featuresChanged) return;
+      if (now - state.lastEmotionUpdate < 1200) return;
+      state.lastEmotionUpdate = now;
+
+      let pool = calmEmotions;
+      if (bluff >= 65) pool = spicyEmotions;
+      else if (bluff >= 40) pool = mixedEmotions.concat(calmEmotions);
+
+      const choice = pool[Math.floor(Math.random() * pool.length)];
+      emotionLabel.textContent = choice;
+    }
+
+    function updateHud() {
+      const { stress, gaze, mouth, base, blinkRate, pose } = state.metrics;
+
+      setMetric("stress", stress, band(stress, 30, 58, ["Low", "Watch", "High"]));
+      setMetric("gaze", gaze, band(gaze, 24, 52, ["Stable", "Shifting", "Erratic"]));
+      setMetric("mouth", mouth, band(mouth, 24, 52, ["Relaxed", "Tight", "Rigid"]));
+      setMetric("base", base, band(base, 24, 52, ["Near base", "Drifting", "Off base"]));
+
+      $("legendEyes").textContent = Math.round(100 - gaze) + "% lock";
+      $("legendNose").textContent = Math.round(100 - pose) + "% stable";
+      $("legendGaze").textContent = Math.round(gaze) + "% drift";
+      $("legendMouth").textContent = Math.round(mouth) + "% tense";
+      $("legendPose").textContent = Math.round(pose) + "% change";
+      $("blinkMini").textContent = Math.round(blinkRate) + "/min";
+      $("gazeMini").textContent =
+        gaze > 48 ? "Off-axis" : gaze > 24 ? "Drifting" : "Centered";
+
+      const sensRaw = Number(sensitivity.value);
+      const sensBoost = 0.5 + sensRaw * 1.1; // boosts effect of sensitivity
+
+      let bluffBoost = 0;
+      if (gaze > 40 && mouth > 40) bluffBoost += 8;
+      if (pose > 35 && state.metrics.eyeOpen !== undefined && state.metrics.eyeOpen < 0.4) bluffBoost += 6;
+      if (blinkRate > 20) bluffBoost += 4;
+
+      const weighted =
+        stress * 0.28 +
+        gaze * 0.24 +
+        mouth * 0.22 +
+        base * 0.16 +
+        Math.min(blinkRate * 2.5, 100) * 0.1 +
+        bluffBoost;
+
+      const bluff = Math.max(0, Math.min(100, weighted * sensBoost));
+      $("bluffPct").textContent = Math.round(bluff);
+      $("gaugeRing").style.strokeDashoffset =
+        540 - (540 * bluff) / 100;
+
+      $("stressLive").textContent = Math.round(stress) + "%";
+      $("gazeLive").textContent = Math.round(gaze) + "%";
+      $("mouthLive").textContent = Math.round(mouth) + "%";
+      $("blinkLive").textContent = Math.round(blinkRate) + "/min";
+
+      const pill = $("statusPill");
+      const gaugeLabel = $("gaugeLabel");
+      const statusText = $("statusText");
+      let hard = "Not bluff";
+      let cls = "low";
+      let gaugeWord = "steady";
+
+      if (bluff >= 55) {  // lowered threshold
+        hard = "Bluff";
+        cls = "high";
+        gaugeWord = "elevated";
+        statusText.textContent =
+          "Multiple proxy signals are elevated against baseline, especially gaze drift, facial tension, and stress trend.";
+      } else if (bluff >= 35) {
+        hard = "Not bluff";
+        cls = "mid";
+        gaugeWord = "mixed";
+        statusText.textContent =
+          "The hard label stays not bluff, but the live feature geometry is becoming less stable.";
+      } else {
+        statusText.textContent = state.calibrated
+          ? "Signals remain close to your learned baseline, so the educated guess stays not bluff."
+          : "Low signal. Continue calibration or vary expression to see the HUD react.";
+      }
+      pill.className = "status-pill " + cls;
+      pill.textContent = hard;
+      gaugeLabel.textContent = gaugeWord;
+
+      updateEmotion(bluff, state.featuresChangedThisFrame === true);
+    }
+
+    function dist2(a, b) {
+      const dx = a[0] - b[0];
+      const dy = a[1] - b[1];
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function eyeAspectRatio(eyePts) {
+      const p1 = eyePts[0];
+      const p4 = eyePts[3];
+      const p2 = eyePts[1];
+      const p6 = eyePts[5];
+      const p3 = eyePts[2];
+      const p5 = eyePts[4];
+      const vert = dist2(p2, p6) + dist2(p3, p5);
+      const horiz = 2 * dist2(p1, p4);
+      return horiz > 0 ? vert / horiz : 0;
+    }
+
+    function mouthAspectRatio(upPts, lowPts) {
+      const upC = upPts[0];
+      const lowC = lowPts[0];
+      const upL = upPts[2];
+      const lowL = lowPts[2];
+      const upR = upPts[1];
+      const lowR = lowPts[1];
+
+      const vert = dist2(upC, lowC) + dist2(upL, lowL) + dist2(upR, lowR);
+      const horiz = dist2(upL, upR) * 3;
+      return horiz > 0 ? vert / horiz : 0;
+    }
+
+    const faceMesh = new FaceMesh({
+      locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/${file}`,
+    });
+    faceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5,
+    });
+
+    function onResults(results) {
+      const rect = stage.getBoundingClientRect();
+      overlay.width = rect.width * devicePixelRatio;
+      overlay.height = rect.height * devicePixelRatio;
+      overlay.style.width = rect.width + "px";
+      overlay.style.height = rect.height + "px";
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+
+      ctx.clearRect(0, 0, rect.width, rect.height);
+
+      if (!results.multiFaceLandmarks || !results.multiFaceLandmarks.length) {
+        $("faceLock").textContent = "Searching";
+        return;
+      }
+
+      const landmarks = results.multiFaceLandmarks[0];
+      const w = rect.width;
+      const h = rect.height;
+
+      function lp(i) {
+        const p = landmarks[i];
+        return [(1 - p.x) * w, p.y * h];
+      }
+
+      ctx.save();
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = "rgba(121,255,213,0.55)";
+      ctx.shadowColor = "rgba(121,255,213,0.15)";
+      ctx.shadowBlur = 8;
+
+      const faceOvalIdx = [
+        10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288,
+        397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136,
+        172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109, 10,
+      ];
+      ctx.beginPath();
+      faceOvalIdx.forEach((i, idx) => {
+        const [x, y] = lp(i);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.stroke();
+
+      const leftEyePts = LEFT_EYE.map(lp);
+      const rightEyePts = RIGHT_EYE.map(lp);
+
+      ctx.strokeStyle = "rgba(66,169,255,0.75)";
+      ctx.beginPath();
+      leftEyePts.forEach(([x, y], idx) => {
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.stroke();
+
+      ctx.beginPath();
+      rightEyePts.forEach(([x, y], idx) => {
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.stroke();
+
+      const leftEAR = eyeAspectRatio(leftEyePts);
+      const rightEAR = eyeAspectRatio(rightEyePts);
+      const ear = (leftEAR + rightEAR) / 2;
+
+      const leftIrisIdx = [469, 470, 471, 472];
+      const rightIrisIdx = [474, 475, 476, 477];
+
+      function irisCenter(ids) {
+        let sx = 0,
+          sy = 0;
+        ids.forEach((i) => {
+          const [x, y] = lp(i);
+          sx += x;
+          sy += y;
+        });
+        return [sx / ids.length, sy / ids.length];
+      }
+
+      const [lx, ly] = irisCenter(leftIrisIdx);
+      const [rx, ry] = irisCenter(rightIrisIdx);
+
+      ctx.fillStyle = "rgba(66,169,255,0.72)";
+      ctx.beginPath();
+      ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(rx, ry, 4, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(lx, ly);
+      ctx.lineTo(lx + (lx - rx) * 0.45, ly - 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx + (rx - lx) * 0.45, ry - 6);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const leftEyeCenterX =
+        (leftEyePts[0][0] + leftEyePts[3][0]) / 2;
+      const leftDrift = Math.abs(lx - leftEyeCenterX);
+      const rightEyeCenterX =
+        (rightEyePts[0][0] + rightEyePts[3][0]) / 2;
+      const rightDrift = Math.abs(rx - rightEyeCenterX);
+      const gazeDriftPx = (leftDrift + rightDrift) / 2;
+
+      const nosePts = NOSE_BRIDGE.map(lp);
+      ctx.strokeStyle = "rgba(121,255,213,0.6)";
+      ctx.beginPath();
+      nosePts.forEach(([x, y], idx) => {
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      const topNose = nosePts[0];
+      const bottomNose = nosePts[nosePts.length - 1];
+      const noseVert = dist2(topNose, bottomNose);
+      const noseHoriz = Math.abs(bottomNose[0] - topNose[0]);
+      const poseTilt = noseHoriz / (noseVert || 1);
+
+      const upperLipPts = UPPER_LIP.map(lp);
+      const lowerLipPts = LOWER_LIP.map(lp);
+
+      const upperLipIdx = [13, 312, 310, 415, 308, 324, 318];
+      const lowerLipIdx = [14, 87, 178, 88, 95, 78, 191];
+      ctx.strokeStyle = "rgba(255,255,255,0.62)";
+      ctx.beginPath();
+      upperLipIdx.forEach((i, idx) => {
+        const [x, y] = lp(i);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      ctx.beginPath();
+      lowerLipIdx.forEach((i, idx) => {
+        const [x, y] = lp(i);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      const mar = mouthAspectRatio(upperLipPts, lowerLipPts);
+
+      ctx.fillStyle = "rgba(121,255,213,0.85)";
+      [6, 1, 13, 14, 33, 263].forEach((i) => {
+        const [x, y] = lp(i);
+        ctx.beginPath();
+        ctx.arc(x, y, 2.1, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.restore();
+      $("faceLock").textContent = "Locked";
+
+      const eyeOpen = Math.max(0, Math.min(1, (ear - 0.15) / 0.15));
+      const blinkRate = (1 - eyeOpen) * 35;
+
+      const mouthNorm = Math.max(
+        0,
+        Math.min(1, (mar - 0.25) / (0.6 - 0.25))
+      );
+      const mouthTension = mouthNorm * 100;
+
+      const gazeNorm = Math.max(
+        0,
+        Math.min(1, gazeDriftPx / (0.16 * w))
+      );
+      const gazeInstability = gazeNorm * 100;
+
+      const poseNorm = Math.max(0, Math.min(1, poseTilt / 0.4));
+      const poseChange = poseNorm * 100;
+
+      const stress =
+        mouthTension * 0.5 +
+        gazeInstability * 0.35 +
+        poseChange * 0.2 +
+        (1 - eyeOpen) * 0.3 * 100;
+
+      const base =
+        (Math.abs(stress - state.baseline.stress) +
+          Math.abs(gazeInstability - state.baseline.gaze) +
+          Math.abs(mouthTension - state.baseline.mouth)) /
+        3;
+
+      // feature-change detection for emotion cue
+      const lf = state.lastFeatures;
+      let delta = 0;
+      let count = 0;
+      function accDiff(prev, curr) {
+        if (prev == null || curr == null) return;
+        delta += Math.abs(prev - curr);
+        count++;
+      }
+      accDiff(lf.ear, ear);
+      accDiff(lf.mar, mar);
+      accDiff(lf.gazeNorm, gazeNorm);
+      accDiff(lf.poseNorm, poseNorm);
+      const avgDelta = count > 0 ? delta / count : 0;
+      const featuresChanged = avgDelta > 0.03;
+      state.featuresChangedThisFrame = featuresChanged;
+      state.lastFeatures = { ear, mar, gazeNorm, poseNorm };
+
+      state.metrics = {
+        stress,
+        gaze: gazeInstability,
+        mouth: mouthTension,
+        pose: poseChange,
+        base,
+        blinkRate,
+        eyeOpen,
+      };
+    }
+
+    faceMesh.onResults(onResults);
+
+    function tick() {
+      if (!state.running) return;
+      const now = performance.now();
+      const activeCalSec = Number(calibrationSeconds.value);
+
+      if (!state.calibrationStartedAt) state.calibrationStartedAt = now;
+      const calProgress = Math.min(
+        1,
+        (now - state.calibrationStartedAt) / (activeCalSec * 1000)
+      );
+      $("calibrationBar").style.width = calProgress * 100 + "%";
+
+      if (calProgress < 1) {
+        $("baselineState").textContent = "Learning";
+        $("calibrationLabel").textContent =
+          "Calibration " + Math.round(calProgress * 100) + "%";
+        $("calibrationHint").textContent =
+          "Hold a neutral face so the app can learn your baseline.";
+        const m = state.metrics;
+        state.baseline.stress =
+          state.baseline.stress * 0.9 + m.stress * 0.1;
+        state.baseline.gaze =
+          state.baseline.gaze * 0.9 + m.gaze * 0.1;
+        state.baseline.mouth =
+          state.baseline.mouth * 0.9 + m.mouth * 0.1;
+      } else {
+        state.calibrated = true;
+        $("baselineState").textContent = "Ready";
+        $("calibrationLabel").textContent = "Baseline locked";
+        $("calibrationHint").textContent =
+          "Current geometry is now compared against your own learned baseline.";
+      }
+
+      const { stress, gaze, mouth, blinkRate } = state.metrics;
+
+      pushSeries("stress", stress);
+      pushSeries("gaze", gaze);
+      pushSeries("mouth", mouth);
+      pushSeries("blink", blinkRate);
+
+      drawSpark("stressChart", sparkState.stress);
+      drawSpark("gazeChart", sparkState.gaze);
+      drawSpark("mouthChart", sparkState.mouth);
+      drawSpark("blinkChart", sparkState.blink, "#ffcb6b", "#ff5e82");
+
+      updateHud();
+      $("fpsStatus").textContent = "Signal quality: live webcam";
+
+      requestAnimationFrame(tick);
+    }
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+
+        video.srcObject = stream;
+        await video.play();
+
+        state.running = true;
+        state.calibrated = false;
+        state.calibrationStartedAt = performance.now();
+        $("modelStatus").textContent =
+          "Face landmarks: live enhanced overlay";
+        startBtn.textContent = "Camera live";
+        startBtn.disabled = true;
+
+        const camera = new Camera(video, {
+          onFrame: async () => {
+            await faceMesh.send({ image: video });
+          },
+          width: 1280,
+          height: 720,
+        });
+
+        camera.start();
+
+        drawSpark("stressChart", sparkState.stress);
+        drawSpark("gazeChart", sparkState.gaze);
+        drawSpark("mouthChart", sparkState.mouth);
+        drawSpark("blinkChart", sparkState.blink, "#ffcb6b", "#ff5e82");
+        updateHud();
+        requestAnimationFrame(tick);
+      } catch (err) {
+        $("fpsStatus").textContent = "Signal quality: camera blocked";
+        $("statusText").textContent =
+          "Camera permission was denied or unavailable. Open this file in a modern browser and allow webcam access.";
+        console.error(err);
+      }
+    }
+
+    startBtn.addEventListener("click", startCamera);
+
+    drawSpark("stressChart", sparkState.stress);
+    drawSpark("gazeChart", sparkState.gaze);
+    drawSpark("mouthChart", sparkState.mouth);
+    drawSpark("blinkChart", sparkState.blink, "#ffcb6b", "#ff5e82");
+    updateHud();
+  </script>
+</body>
+</html>
