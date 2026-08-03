@@ -103,6 +103,101 @@
     reader.readAsDataURL(file);
   };
 
+  // ============================================================================
+// NIGHT PHOTO UPLOAD - FIREBASE STORAGE OVERRIDE
+// ============================================================================
+// Only override if Firebase Storage is available; otherwise keep original
+// base64-in-Firestore behavior so nothing breaks.
+if (window.firebase && typeof firebase.storage === 'function') {
+  (function() {
+    console.log('🔁 Enabling Storage-based handleNightPhotoUpload override');
+
+    const originalHandleNightPhotoUpload = window.handleNightPhotoUpload;
+
+    window.handleNightPhotoUpload = async function(event, nightIndex) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type || !file.type.startsWith('image/')) {
+        showToast('Please select an image file', true);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const compressed = await compressImage(e.target.result);
+
+          if (!window.groupData || !Array.isArray(window.groupData.nights)) {
+            showToast('Group data not loaded', true);
+            return;
+          }
+
+          const night = window.groupData.nights[nightIndex];
+          if (!night) {
+            showToast('Invalid night selected', true);
+            return;
+          }
+
+          if (!Array.isArray(night.photos)) {
+            night.photos = [];
+          }
+
+          // Keep original limit
+          if (night.photos.length >= 5) {
+            showToast('Maximum 5 photos per night', true);
+            return;
+          }
+
+          // Title
+          const titleInput = document.getElementById('nightPhotoTitle');
+          const title = titleInput ? titleInput.value.trim() : '';
+
+          // IDs and paths
+          const timestamp = Date.now();
+          const photoId = `night-${nightIndex}-${timestamp}`;
+          const groupId =
+            (window.groupData.id && window.groupData.id.trim()) ||
+            (window.groupData.groupCode && window.groupData.groupCode.trim()) ||
+            'group-unknown';
+
+          const storagePath = `groups/${groupId}/nights/${nightIndex}/${photoId}.jpg`;
+          const ref = firebase.storage().ref(storagePath);
+
+          // Upload to Storage
+          await ref.putString(compressed, 'data_url');
+          const url = await ref.getDownloadURL();
+
+          // Store lightweight metadata only
+          night.photos.push({
+            id: photoId,
+            url: url,
+            title: title,
+            uploadedAt: new Date(timestamp).toISOString(),
+            uploadedBy: 'Admin'
+          });
+
+          await window.saveGroupData();
+          showToast('Photo added!');
+
+          if (titleInput) titleInput.value = '';
+          event.target.value = '';
+
+          // Existing refresh
+          displayNightPhotos(nightIndex);
+        } catch (error) {
+          console.error('Error uploading photo (Storage override):', error);
+          showToast('Error uploading photo', true);
+        }
+      };
+
+      reader.readAsDataURL(file);
+    };
+  })();
+} else {
+  console.log('⚠️ Firebase Storage not available; using base64 Firestore storage');
+}
+  
   window.deleteNightPhoto = async function(nightIndex, photoIndex) {
     if (!confirm('Delete this photo?')) return;
 
