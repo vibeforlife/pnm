@@ -3304,7 +3304,28 @@
       init();
     }
   </script>
+<!-- Firebase SDKs (v8) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
+<!-- Firebase configuration & initialization -->
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyDRFKc8fr96RNryd9r7OOco-xoQlf_ZcFg",
+    authDomain: "pnm-fx2.firebaseapp.com",
+    projectId: "pnm-fx2",
+    storageBucket: "pnm-fx2.appspot.com",
+    messagingSenderId: "186393450910",
+    appId: "1:186393450910:acfae1bee6e46b718de8f"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+
+  window.db = firebase.firestore();
+  window.storage = firebase.storage();
+</script>
+  
 <script src="v4-enhancements.js"></script>
   <script src="v4-photo-migration-patch.js"></script>
 
