@@ -2062,22 +2062,19 @@
         
         // Add expense adjustments
         if (night.expenses && night.expenses.length > 0) {
-          const totalExpenses = night.expenses.reduce((sum, e) => sum + e.amount, 0);
-          const numPlayers = night.results.length;
-          
-          if (numPlayers > 0) {
-            const perPersonExpense = totalExpenses / numPlayers;
-            
-            // Person who paid gets reimbursed
-            night.expenses.forEach(expense => {
-              balances[expense.paidBy] = (balances[expense.paidBy] || 0) + expense.amount;
+          const playerNames = night.results.map(r => r.player);
+
+          night.expenses.forEach(expense => {
+            const shares = calculateExpenseShares(expense, playerNames);
+
+            // Person who paid gets reimbursed for the full expense.
+            balances[expense.paidBy] = (balances[expense.paidBy] || 0) + expense.amount;
+
+            // Only selected participants pay this expense.
+            shares.forEach(share => {
+              balances[share.player] = (balances[share.player] || 0) - share.amount;
             });
-            
-            // Everyone pays their share
-            night.results.forEach(r => {
-              balances[r.player] = (balances[r.player] || 0) - perPersonExpense;
-            });
-          }
+          });
         }
       });
       
@@ -2472,22 +2469,104 @@
 
     function addExpense(expenseData = null) {
       const container = document.getElementById('nightExpensesContainer');
-      const players = groupData.players || [];
-      
+
+      // Use only players currently entered in this poker night.
+      const players = Array.from(
+        document.querySelectorAll('#nightPlayersContainer .player-result select')
+      )
+        .map(select => select.value)
+        .filter(Boolean);
+
+      // Existing expenses without participants are treated as split among
+      // everyone who played, preserving the previous behavior.
+      const participants = Array.isArray(expenseData?.participants)
+        ? expenseData.participants
+        : players;
+
       const div = document.createElement('div');
       div.className = 'player-result';
-      div.innerHTML = `
-        <select class="form-select" style="flex: 2;">
-          <option value="">Who Paid?</option>
-          ${players.map(p => `<option value="${p}" ${expenseData && p === expenseData.paidBy ? 'selected' : ''}>${p}</option>`).join('')}
-        </select>
-        <input type="number" class="form-input" placeholder="Amount" step="0.01" style="flex: 1;" value="${expenseData ? expenseData.amount : ''}">
-        <input type="text" class="form-input" placeholder="What for?" style="flex: 1.5;" value="${expenseData ? expenseData.description : ''}">
-        <button class="remove-player-btn" onclick="this.parentElement.remove()">×</button>
-      `;
-      container.appendChild(div);
-    }
+      div.style.flexWrap = 'wrap';
 
+      div.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+          <select class="form-select expense-paid-by" style="flex: 2;">
+            <option value="">Who Paid?</option>
+            ${players.map(p => `<option value="${p}" ${expenseData && p === expenseData.paidBy ? 'selected' : ''}>${p}</option>`).join('')}
+          </select>
+
+          <input
+            type="number"
+            class="form-input expense-amount"
+            placeholder="Amount"
+            step="0.01"
+            min="0"
+            style="flex: 1;"
+            value="${expenseData ? expenseData.amount : ''}"
+          >
+
+          <input
+            type="text"
+            class="form-input expense-description"
+            placeholder="What for?"
+            style="flex: 1.5;"
+            value="${expenseData ? expenseData.description : ''}"
+          >
+
+          <button
+            class="remove-player-btn"
+            onclick="this.parentElement.parentElement.remove()"
+          >×</button>
+        </div>
+
+        <div style="width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
+          <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600;">
+            Split Between
+          </div>
+
+          <div
+            class="expense-participants"
+            style="display: flex; flex-wrap: wrap; gap: 8px 14px;"
+          >
+            ${players.map(p => `
+              <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 13px; cursor: pointer;">
+                <input
+                  type="checkbox"
+                  class="expense-participant"
+                  value="${p}"
+                  ${participants.includes(p) ? 'checked' : ''}
+                >
+                <span>${p}</span>
+              </label>
+            `).join('')}
+          </div>
+
+          <div
+            class="expense-participant-count"
+            style="font-size: 11px; color: var(--text-secondary); margin-top: 7px;"
+          ></div>
+        </div>
+      `;
+
+      container.appendChild(div);
+
+      const updateParticipantCount = () => {
+        const selected = div.querySelectorAll('.expense-participant:checked').length;
+        const total = div.querySelectorAll('.expense-participant').length;
+        const count = div.querySelector('.expense-participant-count');
+
+        if (count) {
+          count.textContent = total > 0
+            ? `${selected} of ${total} player${total === 1 ? '' : 's'} selected`
+            : 'No players available';
+        }
+      };
+
+      div.querySelectorAll('.expense-participant').forEach(checkbox => {
+        checkbox.addEventListener('change', updateParticipantCount);
+      });
+
+      updateParticipantCount();
+    }
     async function saveNight() {
       const date = document.getElementById('nightDate').value;
       const location = document.getElementById('nightLocation').value;
@@ -2521,7 +2600,18 @@
         const amount = parseFloat(inputs[0].value) || 0;
         const description = inputs[1].value.trim();
         if (paidBy && amount > 0) {
-          expenses.push({ paidBy, amount, description });
+          const participants = Array.from(
+            div.querySelectorAll('.expense-participant:checked')
+          )
+            .map(checkbox => checkbox.value)
+            .filter(Boolean);
+
+          expenses.push({
+            paidBy,
+            amount,
+            description,
+            participants
+          });
         }
       });
       
@@ -2558,6 +2648,38 @@
       switchTab('nights');
     }
 
+    function getExpenseParticipants(expense, playerNames) {
+      // Expenses created before selective splitting did not have a
+      // participants array. Preserve the original behavior by treating
+      // those expenses as split among everyone in the night.
+      if (!Array.isArray(expense?.participants)) {
+        return playerNames;
+      }
+
+      // Only include players who actually participated in this night.
+      // This also protects against stale participant names in old data.
+      return playerNames.filter(player => expense.participants.includes(player));
+    }
+
+    function calculateExpenseShares(expense, playerNames) {
+      const participants = getExpenseParticipants(expense, playerNames);
+
+      if (participants.length === 0 || !Number.isFinite(expense.amount) || expense.amount <= 0) {
+        return [];
+      }
+
+      // Work entirely in cents so the individual shares always add up
+      // exactly to the expense amount.
+      const totalCents = Math.round(expense.amount * 100);
+      const baseCents = Math.floor(totalCents / participants.length);
+      const remainderCents = totalCents % participants.length;
+
+      return participants.map((player, index) => ({
+        player,
+        amount: (baseCents + (index < remainderCents ? 1 : 0)) / 100
+      }));
+    }
+
     function calculateSettlement() {
       // Get current night data from modal
       const playerResults = [];
@@ -2581,8 +2703,20 @@
         const paidBy = div.querySelector('select').value;
         const amount = parseFloat(inputs[0].value) || 0;
         const description = inputs[1].value.trim();
+
         if (paidBy && amount > 0) {
-          expenses.push({ paidBy, amount, description });
+          const participants = Array.from(
+            div.querySelectorAll('.expense-participant:checked')
+          )
+            .map(checkbox => checkbox.value)
+            .filter(Boolean);
+
+          expenses.push({
+            paidBy,
+            amount,
+            description,
+            participants
+          });
         }
       });
       
@@ -2611,23 +2745,25 @@
       
       if (expenses.length > 0) {
         totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-        const perPersonExpense = totalExpenses / playerResults.length;
-        
+
+        const playerNames = playerResults.map(r => r.player);
         const expenseBalances = {};
-        playerResults.forEach(r => {
-          expenseBalances[r.player] = 0;
+        playerNames.forEach(player => {
+          expenseBalances[player] = 0;
         });
-        
-        // Person who paid gets reimbursed
+
         expenses.forEach(expense => {
-          expenseBalances[expense.paidBy] = (expenseBalances[expense.paidBy] || 0) + expense.amount;
+          // Person who paid gets reimbursed for the full expense.
+          expenseBalances[expense.paidBy] =
+            (expenseBalances[expense.paidBy] || 0) + expense.amount;
+
+          // Only selected participants pay this expense.
+          const shares = calculateExpenseShares(expense, playerNames);
+          shares.forEach(share => {
+            expenseBalances[share.player] -= share.amount;
+          });
         });
-        
-        // Everyone pays their share
-        playerResults.forEach(r => {
-          expenseBalances[r.player] -= perPersonExpense;
-        });
-        
+
         expenseTransactions = calculateTransactionsFromBalances(expenseBalances);
       }
       
@@ -2642,16 +2778,19 @@
       
       // Add expense adjustments
       if (expenses.length > 0) {
-        const perPersonExpense = totalExpenses / playerResults.length;
-        
-        // Person who paid for expenses gets reimbursed
+        const playerNames = playerResults.map(r => r.player);
+
         expenses.forEach(expense => {
-          combinedBalances[expense.paidBy] = (combinedBalances[expense.paidBy] || 0) + expense.amount;
-        });
-        
-        // Everyone pays their share of expenses
-        playerResults.forEach(r => {
-          combinedBalances[r.player] = (combinedBalances[r.player] || 0) - perPersonExpense;
+          // Person who paid for the expense gets reimbursed in full.
+          combinedBalances[expense.paidBy] =
+            (combinedBalances[expense.paidBy] || 0) + expense.amount;
+
+          // Only selected participants pay this expense.
+          const shares = calculateExpenseShares(expense, playerNames);
+          shares.forEach(share => {
+            combinedBalances[share.player] =
+              (combinedBalances[share.player] || 0) - share.amount;
+          });
         });
       }
       
