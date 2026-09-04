@@ -1069,7 +1069,7 @@
       <div class="tab" onclick="switchTab('leaderboard')">🏆 Leaderboard</div>
       <div class="tab" onclick="window.location.href='achievements-enhanced.html?source=admin&group=' + groupId">🎖️ Achievements</div>
       <div class="tab" onclick="switchTab('stats')">📈 Stats</div>
-      <div class="tab" onclick="switchTab('settlement')">💰 Settlement</div>
+      <div class="tab" onclick="switchTab('settlement')" style="display: none;">💰 Settlement</div>
       <div class="tab" onclick="window.location.href='wrapped.html?source=admin&group=' + groupId">🎁 Wrapped</div>
     </div>
 
@@ -1908,7 +1908,7 @@
         leaderboardChart.destroy();
       }
 
-      const top10 = playerStats.slice(0, 10);
+      const top10 = playerStats;
       
       leaderboardChart = new Chart(ctx, {
         type: 'bar',
@@ -3059,16 +3059,6 @@
         });
       }
       
-      // Add empty slots for players not yet added
-      if (players.length > 0) {
-        players.forEach(player => {
-          // Only add if not already in results
-          const alreadyAdded = night.results && night.results.some(r => r.player === player);
-          if (!alreadyAdded) {
-            addPlayerResult(player);
-          }
-        });
-      }
       
       // Populate expenses
       const expenseContainer = document.getElementById('nightExpensesContainer');
