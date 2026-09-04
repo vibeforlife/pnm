@@ -106,9 +106,13 @@
   // ============================================================================
 // NIGHT PHOTO UPLOAD - FIREBASE STORAGE OVERRIDE
 // ============================================================================
-// Only override if Firebase Storage is available; otherwise keep original
-// base64-in-Firestore behavior so nothing breaks.
-if (window.firebase && typeof firebase.storage === 'function') {
+// Wait for Firebase Storage before installing the Storage-based override.
+(function enableStorageNightPhotoUpload() {
+  if (!window.firebaseReady || !window.storage || !window.storageApi) {
+    setTimeout(enableStorageNightPhotoUpload, 100);
+    return;
+  }
+
   (function() {
     console.log('🔁 Enabling Storage-based handleNightPhotoUpload override');
 
@@ -162,16 +166,22 @@ if (window.firebase && typeof firebase.storage === 'function') {
             'group-unknown';
 
           const storagePath = `groups/${groupId}/nights/${nightIndex}/${photoId}.jpg`;
-          const ref = firebase.storage().ref(storagePath);
+          const storageRef = window.storageApi.ref(window.storage, storagePath);
 
           // Upload to Storage
-          await ref.putString(compressed, 'data_url');
-          const url = await ref.getDownloadURL();
+          await window.storageApi.uploadString(
+            storageRef,
+            compressed,
+            'data_url',
+            { contentType: 'image/jpeg' }
+          );
+          const url = await window.storageApi.getDownloadURL(storageRef);
 
           // Store lightweight metadata only
           night.photos.push({
             id: photoId,
             url: url,
+            storagePath: storagePath,
             title: title,
             uploadedAt: new Date(timestamp).toISOString(),
             uploadedBy: 'Admin'
@@ -194,14 +204,36 @@ if (window.firebase && typeof firebase.storage === 'function') {
       reader.readAsDataURL(file);
     };
   })();
-} else {
-  console.log('⚠️ Firebase Storage not available; using base64 Firestore storage');
-}
+})();
   
   window.deleteNightPhoto = async function(nightIndex, photoIndex) {
     if (!confirm('Delete this photo?')) return;
 
-    window.groupData.nights[nightIndex].photos.splice(photoIndex, 1);
+    const photos = window.groupData.nights[nightIndex]?.photos;
+    const photo = photos?.[photoIndex];
+
+    if (!photo) {
+      showToast('Photo not found', true);
+      return;
+    }
+
+    // Delete the Storage object first when this photo has a Storage path.
+    // Older base64 photos without storagePath are deleted from Firestore only.
+    if (photo.storagePath && window.storageApi) {
+      try {
+        const storageRef = window.storageApi.ref(
+          window.storage,
+          photo.storagePath
+        );
+        await window.storageApi.deleteObject(storageRef);
+      } catch (error) {
+        console.error('Error deleting photo from Storage:', error);
+        showToast('Error deleting photo', true);
+        return;
+      }
+    }
+
+    photos.splice(photoIndex, 1);
     await window.saveGroupData();
     showToast('Photo deleted');
     displayNightPhotos(nightIndex);
@@ -220,7 +252,7 @@ if (window.firebase && typeof firebase.storage === 'function') {
 
     container.innerHTML = photos.map((photo, idx) => `
       <div style="position:relative; display:inline-block; margin:5px;">
-        <img src="${photo.data}" 
+        <img src="${photo.url || photo.data}"
              style="width:80px; height:80px; object-fit:cover; border-radius:8px; cursor:pointer; border:1px solid var(--glass-border);"
              onclick="openLightbox(${nightIndex}, ${idx}, 'night')"
              title="${photo.title || ''}">
@@ -374,7 +406,7 @@ if (window.firebase && typeof firebase.storage === 'function') {
     const title = document.getElementById('lightboxTitle');
     
     if (img) {
-      img.src = photo.data;
+      img.src = photo.url || photo.data;
     }
     if (counter) {
       counter.textContent = `${currentLightboxIndex + 1} / ${currentLightboxPhotos.length}`;
@@ -450,7 +482,7 @@ if (window.firebase && typeof firebase.storage === 'function') {
       return `
         <div style="position:relative; cursor:pointer;" 
              onclick="openGalleryLightbox(${idx})">
-          <img src="${photo.data}" 
+          <img src="${photo.url || photo.data}"
                style="width:100%; height:200px; object-fit:cover; border-radius:12px; border:1px solid var(--glass-border);">
           <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent, rgba(0,0,0,0.8)); padding:12px; border-radius:0 0 12px 12px;">
             ${photo.title ? `<div style="font-size:13px; font-weight:700; color:white; margin-bottom:4px;">${photo.title}</div>` : ''}
@@ -508,7 +540,7 @@ if (window.firebase && typeof firebase.storage === 'function') {
       return `
         <div style="position:relative; cursor:pointer;" 
              onclick="openGalleryLightbox(${originalIndex})">
-          <img src="${photo.data}" 
+          <img src="${photo.url || photo.data}"
                style="width:100%; height:200px; object-fit:cover; border-radius:12px; border:1px solid var(--glass-border);">
           <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent, rgba(0,0,0,0.8)); padding:12px; border-radius:0 0 12px 12px;">
             ${photo.title ? `<div style="font-size:13px; font-weight:700; color:white; margin-bottom:4px;">${photo.title}</div>` : ''}
